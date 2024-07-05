@@ -1,0 +1,24 @@
+services:
+  document-generator-app:
+    image: document-generator
+    environment:
+      LOCAL_STORAGE_TEMPLATE_PATH: templates
+      LOCAL_STORAGE_TMP_PATH: tmp
+    volumes:
+     - document_generator-storage:/code/templates
+    logging:
+      driver: json-file
+    deploy:
+      restart_policy:
+        condition: on-failure
+        window: 120s
+        max_attempts: 3
+      resources:
+        reservations:
+          memory: 128M
+        limits:
+          cpus: '1.0'
+          memory: 512M
+volumes:
+  document_generator-storage:
+    external: true

@@ -48,3 +48,9 @@ Thumbs.db
 *.mov
 *.wmv
 
+__pycache__
+venv
+docker-compose.yml
+.env
+templates
+tmp
