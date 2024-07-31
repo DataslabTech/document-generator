@@ -100,13 +100,14 @@ class DoctplDocxGenerator(DocxGenerator):
         for key, value in raw_context.items():
             attr = models.ContextAttribute(key=key, value=value)
 
-            self._process_tpl_key(doc, new_context, attr)
-
             if isinstance(value, dict):
                 self._process_tpl_dict(doc, new_context, attr)
 
             elif isinstance(value, list):
                 self._process_tpl_list(doc, new_context, attr)
+
+            else:
+                self._process_tpl_key(doc, new_context, attr)
 
     def _process_tpl_key(
         self,
@@ -119,9 +120,7 @@ class DoctplDocxGenerator(DocxGenerator):
             return
 
         try:
-            new_key, new_value = self._prepare_prefix(
-                doc, attr.key, attr.value
-            )
+            new_key, new_value = self._prepare_prefix(doc, attr.key, attr.value)
             context[new_key] = new_value
         except errors.ZeroPrefixValueError:
             return
@@ -141,22 +140,35 @@ class DoctplDocxGenerator(DocxGenerator):
         context: dict[str, Any],
         attr: models.ContextAttribute,
     ):
-        context[attr.key] = []
-        for item in attr.value:
-            if isinstance(item, dict):
-                context[attr.key].append({})
-                self._process_tpl_data(doc, item, context[attr.key][-1])  # type: ignore # noqa
-            else:
-                context[attr.key].append(item)
+        if const.DIVIDER in attr.key:
+            new_key = self._split_prefix_key(attr.key)[1]
+            print(new_key)
+            context[new_key] = []
+            for item in attr.value:
+                _, new_value = self._prepare_prefix(doc, attr.key, item)
+                context[new_key].append(new_value)
+        else:
+            context[attr.key] = []
+            for item in attr.value:
+                if isinstance(item, dict):
+                    context[attr.key].append({})
+                    self._process_tpl_data(doc, item, context[attr.key][-1])
+                else:
+                    context[attr.key].append(item)
+
+    def _split_prefix_key(self, key: str) -> tuple[str, str]:
+        return key.split(const.DIVIDER)
 
     def _prepare_prefix(
         self, doc: docxtpl.DocxTemplate, key: str, value: Any
     ) -> tuple[str, Any]:
-        prefix, var_name = key.split(const.DIVIDER)
+        prefix, var_name = self._split_prefix_key(key)
         return var_name, self._prefix_methods[prefix](doc, value)
 
     def _prepare_image(
-        self, doc: docxtpl.DocxTemplate, data: dict[str, Any]
+        self,
+        doc: docxtpl.DocxTemplate,
+        data: dict[str, Any] | list[dict[str, Any]],
     ) -> docxtpl.InlineImage:
         image_data = models.DocxInlineImage(**data)
         image_file = self._get_image_from_source(image_data.source)
@@ -239,7 +251,7 @@ class DoctplDocxGenerator(DocxGenerator):
     ) -> docxtpl.InlineImage:
         width = docx_shared.Mm(width) if width is not None else None
         height = docx_shared.Mm(height) if height is not None else None
-        print(doc.__dict__)
+
         return docxtpl.InlineImage(
             doc, str(img_path), height=height, width=width
         )
