@@ -1,7 +1,7 @@
 import contextlib
 import pathlib
 
-from fastapi import FastAPI
+import fastapi
 from starlette.middleware import cors
 
 from app.api import metadata, router
@@ -23,10 +23,19 @@ PROJECT_VERSION = "1.0.0"
 
 
 @contextlib.asynccontextmanager
-async def lifespan(app: FastAPI):
-
+async def lifespan(app: fastapi.FastAPI):
     file_storage = storage.LocalStorage()
     tmp_storage = storage.LocalStorage()
+
+    template_path = pathlib.Path(settings.LOCAL_STORAGE_TEMPLATE_PATH)
+    tmp_path = pathlib.Path(settings.LOCAL_STORAGE_TMP_PATH)
+
+    if not file_storage.exists(template_path):
+        file_storage.mkdir(template_path)
+
+    if not file_storage.exists(tmp_path):
+        file_storage.mkdir(tmp_path)
+
     tmp_validator = template.StorageTemplateValidator(tmp_storage)
     validator = template.StorageTemplateValidator(file_storage)
     factory = template.StorageTemplateFactory(file_storage, validator)
@@ -38,10 +47,11 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    file_storage.delete(pathlib.Path(settings.LOCAL_STORAGE_TMP_PATH))
+    if file_storage.exists(tmp_path):
+        file_storage.delete(tmp_path)
 
 
-app = FastAPI(
+app = fastapi.FastAPI(
     title=PROJECT_TITLE,
     openapi_url=f"{settings.API_PREFIX}/openapi.json",
     description=PROJECT_DESCRIPTION,
