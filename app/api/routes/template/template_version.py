@@ -2,10 +2,11 @@
 
 import io
 import uuid
+from typing import Any
 
 import fastapi
 
-from app.api import injection, schemas
+from app.api import injection, metadata, schemas
 from app.internal import template
 
 router = fastapi.APIRouter()
@@ -279,3 +280,50 @@ def update_template_version_by_tag(
 
     updated_version = repo.update_version(tpl, version, updates)
     return updated_version
+
+
+@router.get(
+    "/{version_tag}/example",
+    response_model=dict[str, Any],
+    summary="Приклад заповненого тіла версії шаблону",
+    responses={
+        200: {
+            "description": "Successful json body extraction",
+            "content": {
+                "application/json": {
+                    "example": metadata.template_json_body_example
+                }
+            },
+        },
+        404: {
+            "model": schemas.HTTPError,
+            "description": "Template version was not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": ("Template version was not found")}
+                }
+            },
+        },
+    },
+)
+def get_template_version_body_example(
+    template_uuid: uuid.UUID,
+    version_tag: str,
+    repo: template.TemplateRepository = fastapi.Depends(injection.get_repo),
+):
+    tpl = repo.get(template_uuid)
+    if tpl is None:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail="Template was not found.",
+        )
+
+    version = repo.get_version(tpl, version_tag)
+
+    if version is None:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail="Template version was not found",
+        )
+    example = repo.load_template_json_as_dict(tpl, version)
+    return example

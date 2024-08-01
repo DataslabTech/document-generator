@@ -5,6 +5,7 @@ import json
 import pathlib
 import uuid
 from abc import ABC, abstractmethod
+from typing import Any
 
 from app.core import config
 from app.internal import mixin, storage
@@ -216,6 +217,12 @@ class StorageTemplateRepository(repo.TemplateRepository):
         json_path = tpl_validator.get_template_json_path(version_path)
         json_stream = self._file_storage.load_file(json_path)
 
+        return json_stream
+
+    def load_template_json_as_dict(
+        self, template: entity.Template, version: tpl_version.TemplateVersion
+    ) -> dict[str, Any]:
+        json_stream = self.load_template_json(template, version)
         return json.load(json_stream)
 
     def _store_version(
@@ -283,9 +290,7 @@ class StorageTemplateRepository(repo.TemplateRepository):
         template: entity.Template,
         zip_bytes: io.BytesIO,
     ) -> tpl_version.TemplateVersion:
-        tmp_version_path = self._tmp_storage.save_dir(
-            zip_bytes, self._tmp_path
-        )
+        tmp_version_path = self._tmp_storage.save_dir(zip_bytes, self._tmp_path)
         try:
             return self._create_version_from_zip(
                 template, zip_bytes, tmp_version_path
@@ -331,9 +336,7 @@ class StorageTemplateRepository(repo.TemplateRepository):
             raise errors.DuplicationError("...")
 
         self._file_storage.mkdir(template_path)
-        self._file_storage.mkdir(
-            tpl_validator.get_versions_path(template_path)
-        )
+        self._file_storage.mkdir(tpl_validator.get_versions_path(template_path))
         meta_path = tpl_validator.get_meta_path(template_path)
         self._file_storage.save_file(meta_path, meta.to_bytes())
 
