@@ -4,6 +4,7 @@ import io
 import pathlib
 import uuid
 from abc import ABC, abstractmethod
+from typing import Any
 
 from app.internal.template import entity, schema
 from app.internal.template import version as tpl_version
@@ -264,4 +265,18 @@ class TemplateRepository(ABC):
 
         Returns:
           Байтовий потік `.json` файлу.
+        """
+
+    @abstractmethod
+    def load_template_json_as_dict(
+        self, template: entity.Template, version: tpl_version.TemplateVersion
+    ) -> dict[str, Any]:
+        """Завантажити `.json` приклад генерації документу як `dict`.
+
+        Args:
+          template: Шаблон.
+          version: Версія шаблону.
+
+        Returns:
+          `dict` обʼєкт `.json` файлу.
         """

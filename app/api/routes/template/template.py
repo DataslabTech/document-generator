@@ -2,10 +2,11 @@
 
 import io
 import uuid
+from typing import Any
 
 import fastapi
 
-from app.api import injection, schemas
+from app.api import injection, metadata, schemas
 from app.internal import template
 
 router = fastapi.APIRouter()
@@ -97,9 +98,7 @@ def create_template(
             "content": {
                 "application/json": {
                     "example": {
-                        "detail": (
-                            "Template structure is invalid. Reason: ..."
-                        )
+                        "detail": ("Template structure is invalid. Reason: ...")
                     }
                 }
             },
@@ -225,3 +224,49 @@ def update_template(
     )
 
     return updated_tpl
+
+
+@router.get(
+    "/{template_uuid}/example",
+    response_model=dict[str, Any],
+    summary="Приклад заповненого тіла шаблону",
+    responses={
+        200: {
+            "description": "Successful json body extraction",
+            "content": {
+                "application/json": {
+                    "example": metadata.template_json_body_example
+                }
+            },
+        },
+        404: {
+            "model": schemas.HTTPError,
+            "description": "Template was not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": ("Template was not found")}
+                }
+            },
+        },
+    },
+)
+def get_template_body_example(
+    template_uuid: uuid.UUID,
+    repo: template.TemplateRepository = fastapi.Depends(injection.get_repo),
+):
+    tpl = repo.get(template_uuid)
+    if tpl is None:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail="Template was not found",
+        )
+
+    latest_version = tpl.get_latest_version()
+    if latest_version is None:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail="Template version was not found",
+        )
+
+    example = repo.load_template_json_as_dict(tpl, latest_version)
+    return example
