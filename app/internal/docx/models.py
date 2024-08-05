@@ -26,6 +26,18 @@ def _validate_image_dimension(value: Any) -> Any:
     return value
 
 
+class PrefixValue(pydantic.BaseModel):
+    """Ключ-значення префіксного значення для генерації документу.
+
+    Attributes:
+        key: Ключ.
+        value: Значення.
+    """
+
+    key: str
+    value: dict[str, Any]
+
+
 class DocxInlineImage(pydantic.BaseModel):
     """DTO для ключа контексту `IMG|<KEY>`
 

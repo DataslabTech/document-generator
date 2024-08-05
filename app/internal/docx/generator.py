@@ -8,11 +8,13 @@ from typing import Any, Callable
 
 import docx.shared as docx_shared
 import docxtpl
+import jinja2
+import pydantic
 import pyqrcode
 
 from app.core import config
 from app.internal import storage, webclient
-from app.internal.docx import const, errors, filters, formulas, models, regexp
+from app.internal.docx import const, errors, filters, formulas, models
 
 
 class DocxGenerator(ABC):
@@ -44,7 +46,7 @@ class DoctplDocxGenerator(DocxGenerator):
         self._tmp_storage = tmp_storage
 
         self._prefix_methods: dict[
-            str, Callable[[docxtpl.DocxTemplate, dict[str, Any]], Any]
+            str, Callable[[docxtpl.DocxTemplate, models.PrefixValue], Any]
         ] = {
             const.IMG: self._prepare_image,
             const.MATH: self._prepare_formula,
@@ -65,8 +67,17 @@ class DoctplDocxGenerator(DocxGenerator):
         raw_context: dict[str, Any],
         autoescape: bool = True,
     ) -> None:
-        context = self._prepare_context(doc, raw_context)
-        doc.render(context, filters.env, autoescape=autoescape)
+        try:
+            context = self._prepare_context(doc, raw_context)
+            doc.render(context, filters.env, autoescape=autoescape)
+        except jinja2.exceptions.UndefinedError as e:
+            raise errors.DocumentGenerationError(
+                f"Key is not present in request body: {e}"
+            )
+        except errors.PreparePrefixError as e:
+            raise errors.DocumentGenerationError(
+                f"Invalid prefix key passed. {e}"
+            ) from e
 
     def _get_doc(self, template_stream: io.BytesIO) -> docxtpl.DocxTemplate:
         return docxtpl.DocxTemplate(template_stream)
@@ -120,7 +131,9 @@ class DoctplDocxGenerator(DocxGenerator):
             return
 
         try:
-            new_key, new_value = self._prepare_prefix(doc, attr.key, attr.value)
+            new_key, new_value = self._prepare_prefix(
+                doc, models.PrefixValue(key=attr.key, value=attr.value)
+            )
             context[new_key] = new_value
         except errors.ZeroPrefixValueError:
             return
@@ -142,45 +155,53 @@ class DoctplDocxGenerator(DocxGenerator):
     ):
         if const.DIVIDER in attr.key:
             new_key = self._split_prefix_key(attr.key)[1]
-            print(new_key)
             context[new_key] = []
             for item in attr.value:
-                _, new_value = self._prepare_prefix(doc, attr.key, item)
+                _, new_value = self._prepare_prefix(
+                    doc, models.PrefixValue(key=attr.key, value=item)
+                )
                 context[new_key].append(new_value)
         else:
             context[attr.key] = []
             for item in attr.value:
                 if isinstance(item, dict):
                     context[attr.key].append({})
-                    self._process_tpl_data(doc, item, context[attr.key][-1])
+                    self._process_tpl_data(doc, item, context[attr.key][-1])  # type: ignore
                 else:
                     context[attr.key].append(item)
 
     def _split_prefix_key(self, key: str) -> tuple[str, str]:
-        return key.split(const.DIVIDER)
+
+        key_split = key.split(const.DIVIDER)
+        if len(key_split) != 2:
+            raise errors.PreparePrefixError(f"Invalid prefix key name: {key}")
+        return (key_split[0], key_split[1])
 
     def _prepare_prefix(
-        self, doc: docxtpl.DocxTemplate, key: str, value: Any
+        self, doc: docxtpl.DocxTemplate, prefix_value: models.PrefixValue
     ) -> tuple[str, Any]:
-        prefix, var_name = self._split_prefix_key(key)
-        return var_name, self._prefix_methods[prefix](doc, value)
+        prefix, var_name = self._split_prefix_key(prefix_value.key)
+        return var_name, self._prefix_methods[prefix](doc, prefix_value)
 
     def _prepare_image(
-        self,
-        doc: docxtpl.DocxTemplate,
-        data: dict[str, Any] | list[dict[str, Any]],
+        self, doc: docxtpl.DocxTemplate, prefix_value: models.PrefixValue
     ) -> docxtpl.InlineImage:
-        image_data = models.DocxInlineImage(**data)
-        image_file = self._get_image_from_source(image_data.source)
-        image = self._build_inline_image(
-            doc, image_file, image_data.width, image_data.height
-        )
-        return image
+        try:
+            image_data = models.DocxInlineImage(**prefix_value.value)
+            image_file = self._get_image_from_source(image_data.source)
+            image = self._build_inline_image(
+                doc, image_file, image_data.width, image_data.height
+            )
+            return image
+        except (webclient.DownloadFileError, pydantic.ValidationError) as e:
+            raise errors.PreparePrefixError(
+                f"Cannot prepare prefix {prefix_value.key}. Reason: {e}"
+            )
 
     def _prepare_rich_text(
-        self, doc: docxtpl.DocxTemplate, data: dict[str, Any]
+        self, doc: docxtpl.DocxTemplate, prefix_value: models.PrefixValue
     ) -> docxtpl.RichText:
-        rich_text_data = models.DocxRichText(**data)
+        rich_text_data = models.DocxRichText(**prefix_value.value)
         rt = docxtpl.RichText(rich_text_data.base_text)
         for addition in rich_text_data.adds:
             rt.add(  # type: ignore
@@ -205,10 +226,9 @@ class DoctplDocxGenerator(DocxGenerator):
         return rt
 
     def _prepare_qrcode(
-        self, doc: docxtpl.DocxTemplate, data: dict[str, Any]
+        self, doc: docxtpl.DocxTemplate, prefix_value: models.PrefixValue
     ) -> docxtpl.InlineImage:
-        print(data)
-        qrcode_data = models.DocxQrCode.model_validate(data)
+        qrcode_data = models.DocxQrCode.model_validate(prefix_value.value)
         encoded_data = pyqrcode.create(qrcode_data.data, encoding="utf-8")  # type: ignore # noqa
 
         qr_filename = (
@@ -222,22 +242,22 @@ class DoctplDocxGenerator(DocxGenerator):
         )
 
     def _prepare_header_footer_image(
-        self, doc: docxtpl.DocxTemplate, data: dict[str, Any]
+        self, doc: docxtpl.DocxTemplate, prefix_value: models.PrefixValue
     ):
-        image_file = self._get_image_from_source(data["source"])
-        doc.replace_media(data["dummy"], image_file)  # type: ignore
+        image_file = self._get_image_from_source(prefix_value.value["source"])
+        doc.replace_media(prefix_value.value["dummy"], image_file)  # type: ignore
 
     def _prepare_formula(
-        self, doc: docxtpl.DocxTemplate, data: dict[str, Any]
+        self, doc: docxtpl.DocxTemplate, prefix_value: models.PrefixValue
     ) -> docxtpl.Subdoc:
-        formula = formulas.latex_to_word(r"" + data["formula"])
+        formula = formulas.latex_to_word(r"" + prefix_value.value["formula"])
         equation_doc = doc.new_subdoc()  # type: ignore
         p = equation_doc.add_paragraph()
         p._element.append(formula)
         old_get_xml = equation_doc._get_xml  # type: ignore
 
-        def new_get_xml():
-            return old_get_xml().replace(*formulas.format_xml_replace())
+        def new_get_xml() -> Any:
+            return old_get_xml().replace(*formulas.format_xml_replace())  # type: ignore
 
         equation_doc._get_xml = new_get_xml  # type: ignore
         return equation_doc
@@ -257,20 +277,12 @@ class DoctplDocxGenerator(DocxGenerator):
         )
 
     def _get_image_from_source(self, source: str) -> pathlib.Path:
-        if regexp.is_url(source):
-            try:
-                image_file = webclient.download_image(source)
-                image_path = (
-                    pathlib.Path(config.settings.LOCAL_STORAGE_TMP_PATH)
-                    / image_file.name
-                )
-                file_path = self._tmp_storage.save_file(
-                    image_path, image_file.file_bytes
-                )
-                return file_path
-            except webclient.DownloadFileError as e:
-                raise errors.PreparePrefixError(
-                    f"Cannot download image. Reason: {e}"
-                )
-        else:
-            raise errors.PreparePrefixError("Image source must be a valid URL")
+        image_file = webclient.download_file(source)
+        image_path = (
+            pathlib.Path(config.settings.LOCAL_STORAGE_TMP_PATH)
+            / image_file.name
+        )
+        file_path = self._tmp_storage.save_file(
+            image_path, image_file.file_bytes
+        )
+        return file_path

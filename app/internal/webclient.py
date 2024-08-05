@@ -23,7 +23,7 @@ class DownloadedFile:
     file_bytes: io.BytesIO
 
 
-def download_image(url: str, filename: str | None = None) -> DownloadedFile:
+def download_file(url: str, filename: str | None = None) -> DownloadedFile:
     """Завантажує зображення за посиланням в байтову послідовність.
 
     Args:
@@ -55,8 +55,10 @@ def download_image(url: str, filename: str | None = None) -> DownloadedFile:
         )
 
     except ValueError as e:
-        raise DownloadFileError("Invalid URL provided.") from e
+        raise DownloadFileError(f"Invalid URL provided: {url}") from e
     except FileNotFoundError as e:
-        raise DownloadFileError("Save directory does not exist.") from e
+        raise DownloadFileError(
+            f"Save directory does not exist: {filename}"
+        ) from e
     except requests.exceptions.RequestException as e:
-        raise DownloadFileError("Failed to download the image.") from e
+        raise DownloadFileError(f"Failed to download the file: {e}") from e

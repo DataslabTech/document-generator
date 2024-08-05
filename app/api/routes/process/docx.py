@@ -77,7 +77,7 @@ def create_docx_for_latest_version(
     except docx.errors.DocumentGenerationError as e:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail=f"Cannot generate document. Reason: {e}",
+            detail=str(e),
         )
 
 
