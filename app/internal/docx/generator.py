@@ -74,6 +74,10 @@ class DoctplDocxGenerator(DocxGenerator):
             raise errors.DocumentGenerationError(
                 f"Key is not present in request body: {e}"
             )
+        except TypeError as e:
+            raise errors.DocumentGenerationError(
+                f"Invalid template value type: {e}"
+            )
         except errors.PreparePrefixError as e:
             raise errors.DocumentGenerationError(
                 f"Invalid prefix key passed. {e}"
