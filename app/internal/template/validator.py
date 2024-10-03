@@ -202,11 +202,11 @@ class StorageTemplateValidator(TemplateValidator):
         meta = self._validate_version_meta_yaml(meta_yaml_path)
 
         docx_path = get_template_docx_path(version_path)
-        if not docx_path.is_file():
+        if not self._storage.is_file(docx_path):
             raise errors.TemplateValidationError("template.docx not found")
 
         json_path = get_template_json_path(version_path)
-        if not json_path.is_file():
+        if not self._storage.is_file(json_path):
             raise errors.TemplateValidationError("template.json not found")
 
         return meta
@@ -254,9 +254,7 @@ class StorageTemplateValidator(TemplateValidator):
 
     def _validate_versions(self, versions_dir: pathlib.Path):
         if not self._storage.is_dir(versions_dir):
-            raise errors.TemplateValidationError(
-                "Versions directory not found"
-            )
+            raise errors.TemplateValidationError("Versions directory not found")
 
         for version_path in self._storage.listdir(versions_dir):
             self.validate_version_dir(version_path)

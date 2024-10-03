@@ -164,21 +164,7 @@ class VersionTagMixin(pydantic.BaseModel):
 
     @pydantic.field_validator("tag", mode="before")
     @classmethod
-    def validate_tag(cls, value: Any) -> VersionTag:
-        """Провалідувати вхідне значення для `tag`.
-
-        Якщо вхідний тип - `str`, створити з нього `VersionTag`.
-
-        Args:
-          value: вхідне значення для `tag`.
-
-        Returns:
-          `VersionTag`.
-
-        Raises:
-          ValueError: Рядок версії не відповідає визначеному формату.
-          pydantic.ValidationError: Помилка при валідації моделі Pydantic.
-        """
+    def _validate_tag(cls, value: Any) -> VersionTag:
         if isinstance(value, str):
             return VersionTag.from_str(value)
 

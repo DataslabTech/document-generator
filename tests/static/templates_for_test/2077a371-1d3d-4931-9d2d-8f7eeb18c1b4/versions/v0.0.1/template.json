@@ -1,0 +1,254 @@
+{
+  "INNER_ID": "UOS-0102-23-2",
+  "IMSMA_ID": "HAUA48UOS20231123-831",
+  "HAZARD_AREA_NAME": "РК - 04",
+  "CREATION_DATE": "2023-11-23",
+  "ORG_NAME": "Укроборонсервіс",
+  "REPORTER_NAME": "Денис Єрпульов",
+  "REPORTER_POSITION": "Керівник команди (розрахунку, групи) НТО",
+  "WORK_GROUP_ID": "ГР2",
+  "SURVEY_DATE": "2023-11-23",
+  "AREA_TYPE": {
+    "CHA": false,
+    "SHA": true
+  },
+  "HAZARD_TYPE": {
+    "MINEFIELD": false,
+    "BAC": false
+  },
+  "REGION_NAME": "Миколаївська",
+  "DISTRICT_NAME": "Баштанський",
+  "COUNCIL_NAME": "Гopoхівськa",
+  "LOCALITY_NAME": "Виноградне",
+  "SETTLEMENT_ID": "UA63120130070089195",
+  "CLOSEST_SETTLEMENT": {
+    "MATCHES": false,
+    "AREA_DESCRIPTION": "some desc"
+  },
+  "POLLUTION_TYPES": {
+    "ANTI_PERSONNEL_MINE": false,
+    "ANTI_VEHICLE_MINE": false,
+    "UNEXPLODED_ORDNANCE": true,
+    "ABANDONED_EXP_ORDNANCE": true,
+    "CLUSTER_MUNITION": true,
+    "IMPROVISED_EXP_DEVICE": true,
+    "SMALL_ARMS_AMMO": false,
+    "EXPLOSIVES": true,
+    "OTHER": false,
+    "DESCRIPTION": "desc"
+  },
+  "DIRECT_EVIDENCES": {
+    "TYPES": {
+      "MINE_RELATED": true,
+      "DEBRIS": true,
+      "VISIBLE_MINE": true,
+      "DIRECT_REPORT": true,
+      "EXPLOSIONS": true,
+      "OTHER": true
+    },
+    "EVIDENCES": [
+      {
+        "TYPE": "Інше",
+        "LONG_UTM": "304515",
+        "LAT_UTM": "5553808",
+        "DESCRIPTION": "Фото No 3. Вирва"
+      }
+    ],
+    "DESCRIPTION": "На території, що межує з полігоном були виявлені фортифікаційні споруди для захисту особового складу.  Фото 1.\nНа території, що межує з полігоном були виявлені земляні споруди для ведення вогню боєвої техніки (капоніри). Фото 2.\nНа території, що межує з полігоном були виявлені уламки, фрагменти, що знаходяться на поверхні грунту, орієнтовно від 9М27К РСЗВ \"Ураган\". Фото 3.\nПоблизу полігону РК -04, розташоване село Виноградне, яке з березня по листопад  2022р. було під окупацією військ РФ. Польові дороги та прилеглі території використовувались військовими РФ. Крім того село обстрілювалось.\nПолігон знаходиться в зоні колишніх бойових дій. Місцеве населення повідомляє, що в даному районі можуть зустрітися ВНП, також усно інформує, що було чутно вибухи в районі полігону, що обстежується.\nІнформатори:\nЗаєць Наталія Борисівна,  58 років, продавець магазину, мешкає: с. Садове вул. Вереснева 16.\nТел. 066-264-83-74\nТурчинян Тетяна Вікторівна, 40 років, домогосподарка, мешкає: с. Галаганівка, вул, Шевченка, 104. Тел. 099-202-93-22.\nМалих Світлана Анатоліївна, 50 років, домогосподарка, мешкає: с Садове, вул. Паровозна, 1. \nТел. 099-439-33-23.\nБондарчук Сергій Вячеславович, 33 роки, механізатор, мешкає: с. Горохівське, вул. Поштова 7. \nТел. 099-714-52-65."
+  },
+  "INDIRECT_EVIDENCES": {
+    "TYPES": {
+      "FORMER_MIL_POSITION": true,
+      "INDIRECT_REPORT": true,
+      "MINE_SIGNS": true,
+      "REPORTS_ON_DEMINING": true,
+      "OTHER": true
+    },
+    "EVIDENCES": [
+      {
+        "TYPE": "Інше",
+        "LONG_UTM": "304515",
+        "LAT_UTM": "5553808",
+        "DESCRIPTION": "Фото No 3. Вирва"
+      }
+    ],
+    "DESCRIPTION": "На території, що межує з полігоном були виявлені фортифікаційні споруди для захисту особового складу.  Фото 1.\nНа території, що межує з полігоном були виявлені земляні споруди для ведення вогню боєвої техніки (капоніри). Фото 2.\nНа території, що межує з полігоном були виявлені уламки, фрагменти, що знаходяться на поверхні грунту, орієнтовно від 9М27К РСЗВ \"Ураган\". Фото 3.\nПоблизу полігону РК -04, розташоване село Виноградне, яке з березня по листопад  2022р. було під окупацією військ РФ. Польові дороги та прилеглі території використовувались військовими РФ. Крім того село обстрілювалось.\nПолігон знаходиться в зоні колишніх бойових дій. Місцеве населення повідомляє, що в даному районі можуть зустрітися ВНП, також усно інформує, що було чутно вибухи в районі полігону, що обстежується.\nІнформатори:\nЗаєць Наталія Борисівна,  58 років, продавець магазину, мешкає: с. Садове вул. Вереснева 16.\nТел. 066-264-83-74\nТурчинян Тетяна Вікторівна, 40 років, домогосподарка, мешкає: с. Галаганівка, вул, Шевченка, 104. Тел. 099-202-93-22.\nМалих Світлана Анатоліївна, 50 років, домогосподарка, мешкає: с Садове, вул. Паровозна, 1. \nТел. 099-439-33-23.\nБондарчук Сергій Вячеславович, 33 роки, механізатор, мешкає: с. Горохівське, вул. Поштова 7. \nТел. 099-714-52-65."
+  },
+  "POLYGON": {
+    "COUNT": 1,
+    "ZONE": "T36",
+    "COORD_SYSTEM": {
+      "UTM": false,
+      "WGS_84": true
+    },
+    "MAGNETIC_DECLINATION": 9.23,
+    "REF_POINTS": {
+      "LANDMARK": {
+        "LONG_UTM": "304650",
+        "LAT_UTM": "5553808",
+        "DESCRIPTION": ""
+      },
+      "BENCHMARK": {
+        "LONG_UTM": "304650",
+        "LAT_UTM": "5553808",
+        "DESCRIPTION": ""
+      }
+    },
+    "POINTS": [
+      {
+        "FROM": "ОТ",
+        "TO": "СТ",
+        "MAGNETIC_BEARING": "16,04",
+        "TRUE_BEARING": "6,81",
+        "DISTANCE": "257",
+        "LONG_UTM": "304620",
+        "LAT_UTM": "5553569"
+      },
+      {
+        "FROM": "СТ",
+        "TO": "ТП1",
+        "MAGNETIC_BEARING": "271",
+        "TRUE_BEARING": "262",
+        "DISTANCE": "257",
+        "LONG_UTM": "304620",
+        "LAT_UTM": "5553569"
+      }
+    ],
+    "TOTAL_AREA": "23456"
+  },
+  "VEGETATION": {
+    "GRASS": false,
+    "BUSHES": true,
+    "TREES": true,
+    "BULRUSH": true,
+    "NONE": true,
+    "UNKNOWN": true,
+    "OTHER": true
+  },
+  "RELIEF": {
+    "GULLY": true,
+    "RIDGE": true,
+    "HILLSIDE": true,
+    "FLAT": true,
+    "UNKNOWN": true,
+    "OTHER": true
+  },
+  "SLOPE": {
+    "LOW": true,
+    "MEDIUM": true,
+    "HIGH": true
+  },
+  "SEASONALITY": {
+    "SEASONAL": false,
+    "ALL_SEASON": true,
+    "FROM": "квітень",
+    "TO": "серпень",
+    "FROM_ENG": "april",
+    "TO_ENG": "august"
+  },
+  "CURRENT_MARKING": {
+    "OFFICIAL": true,
+    "FENCED": true,
+    "LOCAL": true,
+    "OTHER": true,
+    "NONE": true
+  },
+  "PRIORITY": {
+    "HIGH": true,
+    "MEDIUM": true,
+    "LOW": true,
+    "NONE": true
+  },
+  "UNBLOCKING": {
+    "RE_SURVEY": true,
+    "TECHNICAL_SURVEY": true,
+    "CLEARANCE": true,
+    "CANCELLATION": true,
+    "REASONS": "У зв'язку з тим, що сільськогосподарські поля потребують обробки для подальшого проведення посівної, данний полігон відноситься до високого рівня пріоритету.",
+    "CLEARANCE_DEPTH": 15,
+    "COMMENTS": "Пропоную провести очистку території полігону методом ОРВБД, поверхневе очищення."
+  },
+  "LAND_USE": {
+    "RESIDENTIAL": 23,
+    "SOCIAL": 12,
+    "INFRASTRUCTURE": 34,
+    "ACCESS": 34,
+    "AGRICULTURAL": 23,
+    "NATURAL": 1
+  },
+  "BENEFICIARIES": {
+    "MEN": 1,
+    "WOMEN": 2,
+    "BOYS": 3,
+    "GIRLS": 4,
+    "TOTAL_COUNT": 10
+  },
+  "INFORMATORS": [
+    {
+      "ID": "A",
+      "NAME": "Заєць Наталія Борисівна",
+      "POSITION": "Продавець в магазині",
+      "AGE": 58,
+      "SEX": "ж",
+      "PHONE": "066-264-83-74",
+      "ADDRESS": "с-ще Садове, вул. Вереснева, 16"
+    },
+    {
+      "ID": "A",
+      "NAME": "Заєць Наталія Борисівна",
+      "POSITION": "Продавець в магазині",
+      "AGE": 58,
+      "SEX": "ж",
+      "PHONE": "066-264-83-74",
+      "ADDRESS": "с-ще Садове, вул. Вереснева, 16"
+    },
+    {
+      "ID": "A",
+      "NAME": "Заєць Наталія Борисівна",
+      "POSITION": "Продавець в магазині",
+      "AGE": 58,
+      "SEX": "ж",
+      "PHONE": "066-264-83-74",
+      "ADDRESS": "с-ще Садове, вул. Вереснева, 16"
+    }
+  ],
+  "PHOTO_ADDS": [
+    {
+      "DESCRIPTION": "Опис фото",
+      "UTM_X": 22222,
+      "UTM_Y": 33333,
+      "IMG|PHOTOS": [
+        {
+          "source": "https://ipc.org.ua/wp-content/uploads/2021/10/SBU-01.jpg",
+          "width": 70
+        },
+        {
+          "source": "https://ipc.org.ua/wp-content/uploads/2021/10/SBU-01.jpg",
+          "width": 70
+        },
+        {
+          "source": "https://ipc.org.ua/wp-content/uploads/2021/10/SBU-01.jpg",
+          "width": 70
+        }
+      ]
+    }
+  ],
+  "IMG|LEGEND": {
+    "source": "https://i.pinimg.com/originals/81/9b/fe/819bfec8fafc86d71aa4bff2d31dbe38.jpg",
+    "width": 210
+  },
+  "IMG|MAPS": [
+    {
+      "source": "https://i.pinimg.com/originals/81/9b/fe/819bfec8fafc86d71aa4bff2d31dbe38.jpg",
+      "width": 210
+    },
+    {
+      "source": "https://i.pinimg.com/originals/81/9b/fe/819bfec8fafc86d71aa4bff2d31dbe38.jpg",
+      "width": 210
+    },
+    {
+      "source": "https://i.pinimg.com/originals/81/9b/fe/819bfec8fafc86d71aa4bff2d31dbe38.jpg",
+      "width": 210
+    }
+  ]
+}

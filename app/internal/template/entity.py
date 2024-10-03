@@ -283,6 +283,10 @@ class Template:
           version_obj: Версія шаблону.
           update_meta: Чи потрібно оновлювати метадані.
         """
+        added_version = self.get_version(version_obj.tag.tag)
+        if added_version is not None:
+            raise ValueError(f"Version already exists: {version_obj.tag.tag}")
+
         if update_meta:
             self._meta.add_version(version_obj.tag)
 

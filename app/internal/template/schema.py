@@ -124,14 +124,6 @@ class TemplateVersionUpdate(pydantic.BaseModel):
 
 
 class TemplateVersionResponse(_TemplateVersionBase, meta.VersionTagMixin):
-    """DTO версії шаблону для відповіді API.
-
-    Attributes:x
-        version: Версійний тег шаблону.
-        message: Коментар версії.
-        created_at: Дата створення.
-        updated_at: Дата останнього оновлення.
-    """
 
     created_at: datetime.datetime
     updated_at: datetime.datetime | None = None

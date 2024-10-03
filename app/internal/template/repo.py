@@ -6,7 +6,7 @@ import uuid
 from abc import ABC, abstractmethod
 from typing import Any
 
-from app.internal.template import entity, schema
+from app.internal.template import entity, payload, schema
 from app.internal.template import version as tpl_version
 
 
@@ -60,24 +60,6 @@ class TemplateRepository(ABC):
 
         Args:
           zip_bytes: Байтовий потік `.zip директорії шаблону.
-
-        Returns:
-          Новий шаблон.
-
-        Raises:
-          `TemplateValidationError`: Помилка в разі невідповідності шаблону
-          визначеній структурі.
-        """
-
-    @abstractmethod
-    def create_from_zip_file(self, zip_path: pathlib.Path) -> entity.Template:
-        """Створити `Template` на основі шляху до `.zip` файлу
-        шаблону.
-
-        Утворює нову сутність `Template` в сховищі та повертає обʼєкт.
-
-        Args:
-          zip_path: Шлях до `.zip файлу шаблону.
 
         Returns:
           Новий шаблон.
@@ -280,3 +262,22 @@ class TemplateRepository(ABC):
         Returns:
           `dict` обʼєкт `.json` файлу.
         """
+
+    def validate_generation_payload(
+        self,
+        template: entity.Template,
+        version: tpl_version.TemplateVersion,
+        incoming_payload: dict[str, Any],
+    ) -> payload.ValidationResult:
+        """Validates an incoming dictionary against a template payload structure.
+
+        Args:
+            template (Template): Template object.
+            version (TemplateVersion): Specific version of the template.
+            incoming_payload (dict[str, Any]): The dictionary to be validated.
+
+        Returns:
+            ValidationResult: A report on the validation, detailing any discrepancies.
+        """
+        payload_schema = self.load_template_json_as_dict(template, version)
+        return payload.validate(payload_schema, incoming_payload)

@@ -53,7 +53,7 @@ class MemoryTemplateCache(TemplateCache, mixin.SingletonMixin):
     Реалізує шаблон `Singleton`.
     """
 
-    def __init__(self):
+    def __init__(self):  # type: ignore
         """Створює новий обʼєкт `MemoryTemplateCache`."""
         if not hasattr(self, "_initialized"):
             self._memory: dict[uuid.UUID, entity.Template] = {}
@@ -136,25 +136,13 @@ class StorageTemplateRepository(repo.TemplateRepository):
         tmp_template_path = self._tmp_storage.save_dir(
             zip_bytes, self._tmp_path
         )
+        print("TMP DIR LIST", self._tmp_storage.listdir(self._tmp_path))
+        print("SAVED PATH", tmp_template_path)
         try:
             return self._create_from_zip(zip_bytes, tmp_template_path)
         except errors.TemplateValidationError as e:
             raise e
         finally:
-            self._tmp_storage.delete(tmp_template_path)
-
-    def create_from_zip_file(self, zip_path: pathlib.Path) -> entity.Template:
-        tmp_template_path = self._tmp_storage.extract_zip(
-            zip_path, self._tmp_path
-        )
-        try:
-            zip_bytes = self._tmp_storage.load_file(zip_path)
-            return self._create_from_zip(zip_bytes, tmp_template_path)
-
-        except errors.TemplateValidationError as e:
-            raise e
-        finally:
-            self._tmp_storage.delete(zip_path)
             self._tmp_storage.delete(tmp_template_path)
 
     def get(self, template_uuid: uuid.UUID) -> entity.Template | None:
@@ -333,7 +321,9 @@ class StorageTemplateRepository(repo.TemplateRepository):
     def _store(self, meta: entity.TemplateMetaData) -> pathlib.Path:
         template_path = self._templates_path / str(meta.id)
         if self._file_storage.exists(template_path):
-            raise errors.DuplicationError("...")
+            raise errors.DuplicationError(
+                f"Template already exists: {template_path}"
+            )
 
         self._file_storage.mkdir(template_path)
         self._file_storage.mkdir(tpl_validator.get_versions_path(template_path))
@@ -355,6 +345,7 @@ class StorageTemplateRepository(repo.TemplateRepository):
         self, zip_bytes: io.BytesIO, tmp_template_path: pathlib.Path
     ) -> entity.Template:
         meta = self._tmp_validator.validate_template_dir(tmp_template_path)
+        print("META: ", meta)
         self._check_template_duplication(meta.id)
 
         template_path = self._templates_path / str(meta.id)

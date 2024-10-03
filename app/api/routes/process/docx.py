@@ -29,9 +29,16 @@ router = fastapi.APIRouter(prefix="/docx")
             "description": "Cannot generate document.",
             "content": {
                 "application/json": {
-                    "example": {
-                        "detail": ("Cannot generate document. Reason: ...")
-                    }
+                    "detail": ("Template body is invalid."),
+                    "validation_result": {
+                        "missing_keys": ["KEY1, KEY2, KEY3.SUBKEY5"],
+                        "extra_keys": ["LISTED_KEY[4].VALUE"],
+                        "type_mismatches": [
+                            "BOOL_KEY (expected bool, got int)",
+                            "INT_KEY (expected int, got str)",
+                            "LISTED_KEY[2] (expected dict, got str)",
+                        ],
+                    },
                 }
             },
         },
@@ -66,6 +73,16 @@ def create_docx_for_latest_version(
             detail="Template version was not found",
         )
 
+    validation_report = repo.validate_generation_payload(tpl, version, data)
+    if not validation_report.valid:
+        return fastapi.responses.JSONResponse(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            content=schemas.HttpPayloadValidationError(
+                detail="Template body is invalid.",
+                validation_result=validation_report,
+            ).model_dump(mode="json"),
+        )
+
     try:
         template_stream = repo.load_template_docx(tpl, version)
         generated_docx = generator.generate_bytes(template_stream, data)
@@ -75,9 +92,12 @@ def create_docx_for_latest_version(
         )
 
     except docx.errors.DocumentGenerationError as e:
-        raise fastapi.HTTPException(
+        return fastapi.responses.JSONResponse(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
+            content=schemas.HttpPayloadValidationError(
+                detail="Template body is invalid.",
+                validation_result=str(e),
+            ),
         )
 
 
@@ -89,11 +109,20 @@ def create_docx_for_latest_version(
     responses={
         400: {
             "model": schemas.HTTPError,
-            "description": "Cannot generate document.",
+            "description": "Template body is invalid.",
             "content": {
                 "application/json": {
                     "example": {
-                        "detail": ("Cannot generate document. Reason: ...")
+                        "detail": ("Template body is invalid."),
+                        "validation_result": {
+                            "missing_keys": ["KEY1, KEY2, KEY3.SUBKEY5"],
+                            "extra_keys": ["LISTED_KEY[4].VALUE"],
+                            "type_mismatches": [
+                                "BOOL_KEY (expected bool, got int)",
+                                "INT_KEY (expected int, got str)",
+                                "LISTED_KEY[2] (expected dict, got str)",
+                            ],
+                        },
                     }
                 }
             },
@@ -130,6 +159,16 @@ def create_docx_for_version(
             detail="Template version was not found",
         )
 
+    validation_report = repo.validate_generation_payload(tpl, version, data)
+    if not validation_report.valid:
+        return fastapi.responses.JSONResponse(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            content=schemas.HttpPayloadValidationError(
+                detail="Template body is invalid.",
+                validation_result=validation_report,
+            ),
+        )
+
     try:
         template_stream = repo.load_template_docx(tpl, version)
         generated_docx = generator.generate_bytes(template_stream, data)
@@ -137,6 +176,10 @@ def create_docx_for_version(
             generated_docx, media_type=DOCX_MIME_TYPE
         )
     except docx.errors.DocumentGenerationError as e:
-        raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_400_BAD_REQUEST, detail=e
+        return fastapi.responses.JSONResponse(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            content=schemas.HttpPayloadValidationError(
+                detail="Template body is invalid.",
+                validation_result=str(e),
+            ),
         )

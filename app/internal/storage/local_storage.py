@@ -10,123 +10,172 @@ from app.internal.storage import storage
 
 
 class LocalStorage(storage.Storage):
-    """Сховище даних локальної файлової системи.
+    """Local filesystem storage with root directory enforcement."""
 
-    Імплементація "Storage".
-    """
+    def __init__(self, root: pathlib.Path):
+        self.root = root.resolve()
+
+    def _resolve_path(self, path: pathlib.Path) -> pathlib.Path:
+        """Resolve the path relative to the root and ensure it's within the root directory."""
+        resolved_path = path if path.is_absolute() else self.root / path
+        resolved_path = resolved_path.resolve()
+
+        if not resolved_path.is_relative_to(self.root):
+            raise ValueError(
+                f"Path is outside the root directory: {resolved_path}"
+            )
+
+        return resolved_path
 
     def save_file(self, path: pathlib.Path, data: io.BytesIO) -> pathlib.Path:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("wb") as file:
+        resolved_path = self._resolve_path(path)
+        resolved_path.parent.mkdir(parents=True, exist_ok=True)
+        with resolved_path.open("wb") as file:
             file.write(data.getbuffer())
 
-        return path
+        return resolved_path
 
     def load_file(self, path: pathlib.Path) -> io.BytesIO:
-        with path.open("rb") as file:
+        resolved_path = self._resolve_path(path)
+        with resolved_path.open("rb") as file:
             return io.BytesIO(file.read())
 
     def move_dir(
         self, source: pathlib.Path, destination: pathlib.Path
     ) -> pathlib.Path:
-        if not source.exists() or not source.is_dir():
+        source_resolved = self._resolve_path(source)
+        destination_resolved = self._resolve_path(destination)
+
+        if not source_resolved.exists() or not source_resolved.is_dir():
             raise FileNotFoundError(
-                f"Source directory does not exist: {source=}"
+                f"Source directory does not exist: {source_resolved}"
             )
 
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.move(str(source), str(destination))
+        destination_resolved.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(source_resolved), str(destination_resolved))
 
-        return destination
+        return destination_resolved
 
     def move_file(
         self, source: pathlib.Path, destination: pathlib.Path
     ) -> pathlib.Path:
-        if not source.exists() or not source.is_file():
-            raise FileNotFoundError(f"Source file does not exist: {source=}")
+        source_resolved = self._resolve_path(source)
+        destination_resolved = self._resolve_path(destination)
 
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.move(str(source), str(destination))
+        if not source_resolved.exists() or not source_resolved.is_file():
+            raise FileNotFoundError(
+                f"Source file does not exist: {source_resolved}"
+            )
 
-        return destination
+        destination_resolved.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(source_resolved), str(destination_resolved))
+
+        return destination_resolved
 
     def delete(self, path: pathlib.Path) -> None:
-        if path.is_dir():
-            shutil.rmtree(path)
-        elif path.is_file():
-            path.unlink()
+        resolved_path = self._resolve_path(path)
+        if resolved_path.is_dir():
+            shutil.rmtree(resolved_path)
+        elif resolved_path.is_file():
+            resolved_path.unlink()
         else:
             raise FileNotFoundError(
-                f"Path does not exist or is not a file/directory: {path=}"
+                f"Path does not exist or is not a file/directory: {resolved_path}"
             )
 
     def is_file(self, path: pathlib.Path) -> bool:
-        return path.is_file()
+        resolved_path = self._resolve_path(path)
+        return resolved_path.is_file()
 
     def is_dir(self, path: pathlib.Path) -> bool:
-        return path.is_dir()
+        resolved_path = self._resolve_path(path)
+        return resolved_path.is_dir()
 
     def listdir(self, path: pathlib.Path) -> list[pathlib.Path]:
-        if not self.is_dir(path):
-            raise FileNotFoundError(f"Is not a directory: {path=}")
+        resolved_path = self._resolve_path(path)
+        if not resolved_path.is_dir():
+            raise FileNotFoundError(f"Is not a directory: {resolved_path}")
 
-        return list(path.iterdir())
+        return list(resolved_path.iterdir())
 
     def extract_zip(
         self, zip_path: pathlib.Path, destination: pathlib.Path
     ) -> pathlib.Path:
-        dir_name = zip_path.stem
-        with zipfile.ZipFile(zip_path, "r") as zip_file:
+        zip_resolved = self._resolve_path(zip_path)
+        destination_resolved = self._resolve_path(destination)
+
+        with zipfile.ZipFile(zip_resolved, "r") as zip_file:
             for member in zip_file.namelist():
                 if member.startswith("__MACOSX/"):
                     continue
-                zip_file.extract(member, destination)
+                zip_file.extract(member, destination_resolved)
 
-        return destination / dir_name
+        return destination_resolved
 
+    # TODO: think about deleting this method because LocaStorage.load_file can be used instead
     def load_zip(self, zip_path: pathlib.Path) -> io.BytesIO:
-        zip_bytesio = io.BytesIO()
+        zip_resolved = self._resolve_path(zip_path)
+        with open(zip_resolved, "rb") as f:
+            zip_bytes = f.read()
 
-        with zipfile.ZipFile(zip_path, "r") as zip_file:
-            for file_name in zip_file.namelist():
-                file_content = zip_file.read(file_name)
-                zip_bytesio.write(file_content)
-
+        zip_bytesio = io.BytesIO(zip_bytes)
         zip_bytesio.seek(0)
-
         return zip_bytesio
 
     def load_dir_as_zip(self, dir_path: pathlib.Path) -> io.BytesIO:
+        dir_resolved = self._resolve_path(dir_path)
+        if not self.exists(dir_resolved):
+            raise FileNotFoundError(
+                f"Path does not exist or is not a file/directory: {dir_resolved}"
+            )
         zip_buffer = io.BytesIO()
 
-        with zipfile.ZipFile(
-            zip_buffer, "w", zipfile.ZIP_DEFLATED
-        ) as zip_file:
-            for file_path in dir_path.rglob("*"):
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for file_path in dir_resolved.rglob("*"):
                 if file_path.is_file():
-                    zip_file.write(file_path, file_path)
+                    zip_file.write(
+                        file_path, file_path.relative_to(dir_resolved)
+                    )
 
         zip_buffer.seek(0)
         return zip_buffer
 
+    # TODO: make private method for extracting zip files
     def save_dir(
         self, zip_bytes: io.BytesIO, path: pathlib.Path
     ) -> pathlib.Path:
-        self.mkdir(path)
+        resolved_path = self._resolve_path(path)
+        self.mkdir(resolved_path)
 
-        with zipfile.ZipFile(zip_bytes, "r") as zip_ref:
-            zip_members = zip_ref.namelist()
-            zip_name = zip_members[0].strip("/")
-            for member in zip_members:
+        root_name = None
+
+        with zipfile.ZipFile(zip_bytes, "r") as zip_file:
+            zip_namelist = zip_file.namelist()
+            top_level_dirs = {
+                pathlib.Path(name).parts[0]
+                for name in zip_namelist
+                if not name.startswith("__MACOSX/")
+            }
+
+            if len(top_level_dirs) == 1:
+                root_name = next(iter(top_level_dirs))
+            else:
+                root_name = None
+            for member in zip_namelist:
                 if member.startswith("__MACOSX/"):
                     continue
-                zip_ref.extract(member, path)
+                zip_file.extract(member, resolved_path)
 
-        return path / zip_name
+        if root_name:
+            return resolved_path / root_name
+
+        return resolved_path
 
     def exists(self, path: pathlib.Path) -> bool:
-        return path.exists()
+        resolved_path = self._resolve_path(path)
+        return resolved_path.exists()
 
     def mkdir(self, path: pathlib.Path) -> pathlib.Path:
-        path.mkdir(parents=True, exist_ok=True)
-        return path
+        resolved_path = self._resolve_path(path)
+        resolved_path.mkdir(parents=True, exist_ok=True)
+        return resolved_path

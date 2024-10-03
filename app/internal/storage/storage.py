@@ -1,4 +1,4 @@
-"""Модуль описує інтерфейс Storage для доступу до сховища."""
+"""The module describes the Storage interface for accessing storage."""
 
 import io
 import pathlib
@@ -6,195 +6,195 @@ from abc import ABC, abstractmethod
 
 
 class Storage(ABC):
-    """Сховище даних."""
+    """Data storage."""
 
     @abstractmethod
     def save_file(self, path: pathlib.Path, data: io.BytesIO) -> pathlib.Path:
-        """Зберегти байтовий потік файлу за шляхом.
+        """Save a byte stream of the file to a path.
 
         Args:
-          path: шлях, за яким слід зберегти файл.
-          data: байтова послідовність файлу.
+          path: the path where the file should be saved.
+          data: byte sequence of the file.
 
         Returns:
-          Шлях до новоствореного файлу.
+          The path to the newly created file.
         """
 
     @abstractmethod
     def load_file(self, path: pathlib.Path) -> io.BytesIO:
-        """Завантажити файл в байтовий потік за шляхом.
+        """Load a file into a byte stream from a path.
 
         Args:
-          path: шлях, за яким слід зберегти файл.
+          path: the path from where the file should be loaded.
 
         Returns:
-          Байтова послідовність файлу.
+          Byte sequence of the file.
 
         Raises:
-          FileNotFoundError: Файл не знайдено.
+          FileNotFoundError: File not found.
         """
 
     @abstractmethod
     def move_dir(
         self, source: pathlib.Path, destination: pathlib.Path
     ) -> pathlib.Path:
-        """Перемістити директорію в інше місце.
+        """Move a directory to a new location.
 
         Args:
-          source: Поточний шлях директорії.
-          destination: Шлях, куди треба перемістити директорію.
+          source: Current path of the directory.
+          destination: The path where the directory should be moved.
 
         Returns:
-          Шлях до переміщеної директорії.
+          Path to the moved directory.
 
         Raises:
-          FileNotFoundError: Шлях не знайдено.
+          FileNotFoundError: Path not found.
         """
 
     @abstractmethod
     def move_file(
         self, source: pathlib.Path, destination: pathlib.Path
     ) -> pathlib.Path:
-        """Перемістити файл в інше місце.
+        """Move a file to a new location.
 
         Args:
-          source: Поточний шлях до файлу.
-          destination: Шлях, куди треба перемістити файл.
+          source: Current path of the file.
+          destination: The path where the file should be moved.
 
         Returns:
-          Шлях до переміщеного файлу.
+          Path to the moved file.
 
         Raises:
-          FileNotFoundError: Шлях не знайдено.
+          FileNotFoundError: Path not found.
         """
 
     @abstractmethod
     def delete(self, path: pathlib.Path) -> None:
-        """Видалити файл або директорію.
+        """Delete a file or directory.
 
         Args:
-          path: Шлях обʼєкту на видалення.
+          path: Path of the object to be deleted.
 
         Raises:
-          FileNotFoundError: Шлях не знайдено.
+          FileNotFoundError: Path not found.
         """
 
     @abstractmethod
     def is_file(self, path: pathlib.Path) -> bool:
-        """Перевірити, чи є обʼєкт за шляхом файлом.
+        """Check if the object at the path is a file.
 
         Args:
-          path: Шлях обʼєкту.
+          path: Path of the object.
 
         Returns:
-          `True`, якщо обʼєкт - це файл, `False` інакше.
+          `True` if the object is a file, `False` otherwise.
 
         Raises:
-          FileNotFoundError: Шлях не знайдено.
+          FileNotFoundError: Path not found.
         """
 
     @abstractmethod
     def is_dir(self, path: pathlib.Path) -> bool:
-        """Перевірити, чи є обʼєкт за шляхом директорією.
+        """Check if the object at the path is a directory.
 
         Args:
-          path: Шлях обʼєкту.
+          path: Path of the object.
 
         Returns:
-          `True`, якщо обʼєкт - це директорія, `False` інакше.
+          `True` if the object is a directory, `False` otherwise.
 
         Raises:
-          FileNotFoundError: Шлях не знайдено.
+          FileNotFoundError: Path not found.
         """
 
     @abstractmethod
     def listdir(self, path: pathlib.Path) -> list[pathlib.Path]:
-        """Отримати список обʼєктів в директорії.
+        """Get a list of objects in a directory.
 
         Args:
-          path: Шлях до директорії.
+          path: Path to the directory.
 
-        Returns: Список шляхів до обʼєктів директорії.
+        Returns:
+          List of paths to the objects in the directory.
 
         Raises:
-          FileNotFoundError: Шлях не знайдено.
+          FileNotFoundError: Path not found.
         """
 
     @abstractmethod
     def mkdir(self, path: pathlib.Path) -> pathlib.Path:
-        """
-        Створити директорію
+        """Create a directory.
 
         Args:
-          path: Шлях до директорії, що має бути створена.
+          path: Path of the directory to be created.
 
         Returns:
-          Шлях до нової директорії.
+          Path to the newly created directory.
         """
 
     @abstractmethod
     def exists(self, path: pathlib.Path) -> bool:
-        """Перевірити, чи існує обʼєкт за шляхом.
+        """Check if the object exists at the path.
 
         Args:
-          path: Шлях обʼєкту.
+          path: Path of the object.
 
         Returns:
-          `True`, якщо обʼєкт існує, `False` інакше.
+          `True` if the object exists, `False` otherwise.
         """
 
     @abstractmethod
     def save_dir(
         self, zip_bytes: io.BytesIO, path: pathlib.Path
     ) -> pathlib.Path:
-        """Зберегти директорію з байтового потоку `zip` за шляхом.
+        """Save a directory from a `zip` byte stream to a path.
 
         Args:
-          zip_bytes: Байтовий потік `zip` архіву.
-          path: Директорія, куди збережеться інформація.
+          zip_bytes: Byte stream of the `zip` archive.
+          path: Directory where the data should be saved.
 
         Returns:
-          Шлях до новоствореної директорії.
+          Path to the newly created directory.
         """
 
     @abstractmethod
     def extract_zip(
         self, zip_path: pathlib.Path, destination: pathlib.Path
     ) -> pathlib.Path:
-        """Розпакувати `zip` архів.
+        """Extract a `zip` archive.
 
         Args:
-          zip_path: Шлях до `zip` врхіву.
-          destination: Директорія, куди розпакується архів.
+          zip_path: Path to the `zip` archive.
+          destination: Directory where the archive will be extracted.
 
         Returns:
-          Шлях до розпакованої директорії.
+          Path to the extracted directory.
         """
 
     @abstractmethod
     def load_zip(self, zip_path: pathlib.Path) -> io.BytesIO:
-        """Завантажити `zip` архів в байтовий потік.
+        """Load a `zip` archive into a byte stream.
 
         Args:
-          zip_path: Шлях до `zip` врхіву.
+          zip_path: Path to the `zip` archive.
 
         Returns:
-          Байтовий потік `zip` архіву.
+          Byte stream of the `zip` archive.
 
         Raises:
-          FileNotFoundError: Шлях не знайдено.
+          FileNotFoundError: Path not found.
         """
 
     @abstractmethod
     def load_dir_as_zip(self, dir_path: pathlib.Path) -> io.BytesIO:
-        """Запакувати директорію в байтовий потік `zip` архіву
+        """Package a directory into a `zip` byte stream.
 
         Args:
-          dir_path: Шлях до директорії.
+          dir_path: Path to the directory.
 
         Returns:
-          Байтовий потік `zip` архіву.
+          Byte stream of the `zip` archive.
 
         Raises:
-          FileNotFoundError: Шлях не знайдено.
+          FileNotFoundError: Path not found.
         """
