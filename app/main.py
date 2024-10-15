@@ -24,8 +24,12 @@ PROJECT_VERSION = "1.0.0"
 
 @contextlib.asynccontextmanager
 async def lifespan(app: fastapi.FastAPI):
-    file_storage = storage.LocalStorage()
-    tmp_storage = storage.LocalStorage()
+    file_storage = storage.LocalStorage(
+        pathlib.Path(settings.LOCAL_STORAGE_TEMPLATE_PATH)
+    )
+    tmp_storage = storage.LocalStorage(
+        pathlib.Path(settings.LOCAL_STORAGE_TMP_PATH)
+    )
 
     template_path = pathlib.Path(settings.LOCAL_STORAGE_TEMPLATE_PATH)
     tmp_path = pathlib.Path(settings.LOCAL_STORAGE_TMP_PATH)
