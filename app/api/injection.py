@@ -1,16 +1,23 @@
 """Dependency injection для роботи API."""
 
+import pathlib
+
 import fastapi
 
+from app.core import config
 from app.internal import docx, storage, template
 
 
 def get_file_storage() -> storage.Storage:
-    return storage.LocalStorage()
+    return storage.LocalStorage(
+        pathlib.Path(config.settings.LOCAL_STORAGE_TEMPLATE_PATH)
+    )
 
 
 def get_tmp_storage() -> storage.Storage:
-    return storage.LocalStorage()
+    return storage.LocalStorage(
+        pathlib.Path(config.settings.LOCAL_STORAGE_TMP_PATH)
+    )
 
 
 def get_validator(
