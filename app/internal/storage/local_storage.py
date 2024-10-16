@@ -13,10 +13,17 @@ class LocalStorage(storage.Storage):
     """Local filesystem storage with root directory enforcement."""
 
     def __init__(self, root: pathlib.Path):
-        self.root = root.resolve()
+        self._root = root.resolve()
 
-    def _resolve_path(self, path: pathlib.Path) -> pathlib.Path:
+    @property
+    def root(self) -> pathlib.Path:
+        return self._root
+
+    def _resolve_path(self, path: pathlib.Path | None) -> pathlib.Path:
         """Resolve the path relative to the root and ensure it's within the root directory."""
+        if path is None:
+            return self.root
+
         resolved_path = path if path.is_absolute() else self.root / path
         resolved_path = resolved_path.resolve()
 
@@ -27,7 +34,9 @@ class LocalStorage(storage.Storage):
 
         return resolved_path
 
-    def save_file(self, path: pathlib.Path, data: io.BytesIO) -> pathlib.Path:
+    def save_file(
+        self, data: io.BytesIO, path: pathlib.Path | None = None
+    ) -> pathlib.Path:
         resolved_path = self._resolve_path(path)
         resolved_path.parent.mkdir(parents=True, exist_ok=True)
         with resolved_path.open("wb") as file:
@@ -41,7 +50,7 @@ class LocalStorage(storage.Storage):
             return io.BytesIO(file.read())
 
     def move_dir(
-        self, source: pathlib.Path, destination: pathlib.Path
+        self, source: pathlib.Path, destination: pathlib.Path | None = None
     ) -> pathlib.Path:
         source_resolved = self._resolve_path(source)
         destination_resolved = self._resolve_path(destination)
@@ -57,7 +66,7 @@ class LocalStorage(storage.Storage):
         return destination_resolved
 
     def move_file(
-        self, source: pathlib.Path, destination: pathlib.Path
+        self, source: pathlib.Path, destination: pathlib.Path | None = None
     ) -> pathlib.Path:
         source_resolved = self._resolve_path(source)
         destination_resolved = self._resolve_path(destination)
@@ -91,7 +100,7 @@ class LocalStorage(storage.Storage):
         resolved_path = self._resolve_path(path)
         return resolved_path.is_dir()
 
-    def listdir(self, path: pathlib.Path) -> list[pathlib.Path]:
+    def listdir(self, path: pathlib.Path | None = None) -> list[pathlib.Path]:
         resolved_path = self._resolve_path(path)
         if not resolved_path.is_dir():
             raise FileNotFoundError(f"Is not a directory: {resolved_path}")
@@ -99,7 +108,7 @@ class LocalStorage(storage.Storage):
         return list(resolved_path.iterdir())
 
     def extract_zip(
-        self, zip_path: pathlib.Path, destination: pathlib.Path
+        self, zip_path: pathlib.Path, destination: pathlib.Path | None = None
     ) -> pathlib.Path:
         zip_resolved = self._resolve_path(zip_path)
         destination_resolved = self._resolve_path(destination)
@@ -142,7 +151,7 @@ class LocalStorage(storage.Storage):
 
     # TODO: make private method for extracting zip files
     def save_dir(
-        self, zip_bytes: io.BytesIO, path: pathlib.Path
+        self, zip_bytes: io.BytesIO, path: pathlib.Path | None = None
     ) -> pathlib.Path:
         resolved_path = self._resolve_path(path)
         self.mkdir(resolved_path)

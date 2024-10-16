@@ -8,13 +8,22 @@ from abc import ABC, abstractmethod
 class Storage(ABC):
     """Data storage."""
 
+    @property
     @abstractmethod
-    def save_file(self, path: pathlib.Path, data: io.BytesIO) -> pathlib.Path:
+    def root(self) -> pathlib.Path:
+        """Get the root path of the storage."""
+
+    @abstractmethod
+    def save_file(
+        self,
+        data: io.BytesIO,
+        path: pathlib.Path | None = None,
+    ) -> pathlib.Path:
         """Save a byte stream of the file to a path.
 
         Args:
-          path: the path where the file should be saved.
           data: byte sequence of the file.
+          path: the path where the file should be saved.
 
         Returns:
           The path to the newly created file.
@@ -36,7 +45,7 @@ class Storage(ABC):
 
     @abstractmethod
     def move_dir(
-        self, source: pathlib.Path, destination: pathlib.Path
+        self, source: pathlib.Path, destination: pathlib.Path | None = None
     ) -> pathlib.Path:
         """Move a directory to a new location.
 
@@ -53,7 +62,7 @@ class Storage(ABC):
 
     @abstractmethod
     def move_file(
-        self, source: pathlib.Path, destination: pathlib.Path
+        self, source: pathlib.Path, destination: pathlib.Path | None = None
     ) -> pathlib.Path:
         """Move a file to a new location.
 
@@ -108,7 +117,7 @@ class Storage(ABC):
         """
 
     @abstractmethod
-    def listdir(self, path: pathlib.Path) -> list[pathlib.Path]:
+    def listdir(self, path: pathlib.Path | None = None) -> list[pathlib.Path]:
         """Get a list of objects in a directory.
 
         Args:
@@ -145,7 +154,7 @@ class Storage(ABC):
 
     @abstractmethod
     def save_dir(
-        self, zip_bytes: io.BytesIO, path: pathlib.Path
+        self, zip_bytes: io.BytesIO, path: pathlib.Path | None = None
     ) -> pathlib.Path:
         """Save a directory from a `zip` byte stream to a path.
 
@@ -159,7 +168,7 @@ class Storage(ABC):
 
     @abstractmethod
     def extract_zip(
-        self, zip_path: pathlib.Path, destination: pathlib.Path
+        self, zip_path: pathlib.Path, destination: pathlib.Path | None = None
     ) -> pathlib.Path:
         """Extract a `zip` archive.
 

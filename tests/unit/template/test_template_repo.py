@@ -113,7 +113,7 @@ class TestStorageTemplateRepo:
             title="template", description="description", labels=[]
         )
         template = template_repo.create(create_schema)
-        template_path = pathlib.Path("templates") / str(template.id)
+        template_path = pathlib.Path(str(template.id))
 
         assert template_repo._file_storage.is_dir(template_path)
         assert template_repo.get(template.id) is not None
@@ -129,7 +129,7 @@ class TestStorageTemplateRepo:
         zip_bytesio = io.BytesIO(zip_bytes)
 
         template = template_repo.create_from_zip_bytes(zip_bytesio)
-        template_path = pathlib.Path("templates") / str(template.id)
+        template_path = pathlib.Path(str(template.id))
 
         assert template_repo._file_storage.is_dir(template_path)
         assert template_repo.get(template.id) is not None
@@ -216,9 +216,7 @@ class TestStorageTemplateRepo:
 
         assert template_repo.get_version(template, "v0.0.1") == version
 
-        version_path = pathlib.Path(
-            "templates", str(template.id), "versions", "v0.0.1"
-        )
+        version_path = pathlib.Path(str(template.id), "versions", "v0.0.1")
         self.validate_template_version_dir(template_repo, version_path)
 
     def test_create_version_from_path(
@@ -238,9 +236,7 @@ class TestStorageTemplateRepo:
 
         assert template_repo.get_version(template, "v0.0.1") == version
 
-        version_path = pathlib.Path(
-            "templates", str(template.id), "versions", "v0.0.1"
-        )
+        version_path = pathlib.Path(str(template.id), "versions", "v0.0.1")
 
         assert template_repo._file_storage.is_dir(version_path)
 

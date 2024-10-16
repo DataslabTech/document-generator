@@ -11,7 +11,7 @@ def test_save_file(storage: storage_module.Storage, tmp_path: pathlib.Path):
     data = io.BytesIO(b"test content")
     path = tmp_path / "test_dir" / "test_file.txt"
 
-    saved_path = storage.save_file(path, data)
+    saved_path = storage.save_file(data, path)
 
     assert saved_path.exists()
     assert path == saved_path
@@ -21,7 +21,7 @@ def test_save_file(storage: storage_module.Storage, tmp_path: pathlib.Path):
 def test_load_file(storage: storage_module.Storage, tmp_path: pathlib.Path):
     data = io.BytesIO(b"test content")
     path = tmp_path / "test_dir" / "test_file.txt"
-    saved_file_path = storage.save_file(path, data)
+    saved_file_path = storage.save_file(data, path)
 
     loaded_data = storage.load_file(saved_file_path)
 
@@ -47,7 +47,7 @@ def test_load_file_outside_root(
 def test_move_file(storage: storage_module.Storage, tmp_path: pathlib.Path):
     data = io.BytesIO(b"test content")
     src_path = tmp_path / "test_dir" / "test_file.txt"
-    storage.save_file(src_path, data)
+    storage.save_file(data, src_path)
 
     dst_path = pathlib.Path("test_dir_moved/test_file.txt")
     moved_path = storage.move_file(src_path, dst_path)
@@ -80,7 +80,7 @@ def test_move_dir(storage: storage_module.Storage, tmp_path: pathlib.Path):
 def test_delete_file(storage: storage_module.Storage, tmp_path: pathlib.Path):
     data = io.BytesIO(b"test content")
     path = tmp_path / "test_file.txt"
-    storage.save_file(path, data)
+    storage.save_file(data, path)
 
     storage.delete(path)
 
@@ -105,7 +105,7 @@ def test_delete_dir(storage: storage_module.Storage, tmp_path: pathlib.Path):
 def test_is_file(storage: storage_module.Storage):
     data = io.BytesIO(b"test content")
     file_path = pathlib.Path("test_file.txt")
-    storage.save_file(file_path, data)
+    storage.save_file(data, file_path)
 
     assert storage.is_file(file_path)
 

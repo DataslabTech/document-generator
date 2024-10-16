@@ -7,7 +7,6 @@ import uuid
 from abc import ABC, abstractmethod
 from typing import Any
 
-from app.core import config
 from app.internal import mixin, storage
 from app.internal.template import entity, errors
 from app.internal.template import factory as tpl_factory
@@ -99,17 +98,12 @@ class StorageTemplateRepository(repo.TemplateRepository):
 
         self._cache = cache
 
-        self._tmp_path = pathlib.Path(config.settings.LOCAL_STORAGE_TMP_PATH)
-        self._templates_path = pathlib.Path(
-            config.settings.LOCAL_STORAGE_TEMPLATE_PATH
-        )
-
     def setup_cache(self) -> None:
         """Наповнити кеш шаблонами.
 
         Слід виконувати під час старту застосунку.
         """
-        for template_path in self._file_storage.listdir(self._templates_path):
+        for template_path in self._file_storage.listdir(pathlib.Path()):
             self._setup_template(template_path)
 
     def list_all(self) -> list[entity.Template]:
@@ -134,10 +128,8 @@ class StorageTemplateRepository(repo.TemplateRepository):
 
     def create_from_zip_bytes(self, zip_bytes: io.BytesIO) -> entity.Template:
         tmp_template_path = self._tmp_storage.save_dir(
-            zip_bytes, self._tmp_path
+            zip_bytes,
         )
-        print("TMP DIR LIST", self._tmp_storage.listdir(self._tmp_path))
-        print("SAVED PATH", tmp_template_path)
         try:
             return self._create_from_zip(zip_bytes, tmp_template_path)
         except errors.TemplateValidationError as e:
@@ -229,13 +221,13 @@ class StorageTemplateRepository(repo.TemplateRepository):
         self._file_storage.mkdir(version_path)
 
         meta_path = tpl_validator.get_meta_path(version_path)
-        self._file_storage.save_file(meta_path, version_meta.to_bytes())
+        self._file_storage.save_file(version_meta.to_bytes(), meta_path)
 
         docx_path = tpl_validator.get_template_docx_path(version_path)
-        self._file_storage.save_file(docx_path, docx_bytes)
+        self._file_storage.save_file(docx_bytes, docx_path)
 
         json_path = tpl_validator.get_template_json_path(version_path)
-        self._file_storage.save_file(json_path, json_bytes)
+        self._file_storage.save_file(json_bytes, json_path)
 
         static_path = tpl_validator.get_static_path(version_path)
         self._file_storage.mkdir(static_path)
@@ -278,7 +270,9 @@ class StorageTemplateRepository(repo.TemplateRepository):
         template: entity.Template,
         zip_bytes: io.BytesIO,
     ) -> tpl_version.TemplateVersion:
-        tmp_version_path = self._tmp_storage.save_dir(zip_bytes, self._tmp_path)
+        tmp_version_path = self._tmp_storage.save_dir(
+            zip_bytes, pathlib.Path(".")
+        )
         try:
             return self._create_version_from_zip(
                 template, zip_bytes, tmp_version_path
@@ -319,16 +313,16 @@ class StorageTemplateRepository(repo.TemplateRepository):
         return template
 
     def _store(self, meta: entity.TemplateMetaData) -> pathlib.Path:
-        template_path = self._templates_path / str(meta.id)
+        template_path = pathlib.Path(str(meta.id))
         if self._file_storage.exists(template_path):
             raise errors.DuplicationError(
                 f"Template already exists: {template_path}"
             )
 
-        self._file_storage.mkdir(template_path)
         self._file_storage.mkdir(tpl_validator.get_versions_path(template_path))
         meta_path = tpl_validator.get_meta_path(template_path)
-        self._file_storage.save_file(meta_path, meta.to_bytes())
+        path = self._file_storage.save_file(meta.to_bytes(), meta_path)
+        print("META", path)
 
         return template_path
 
@@ -348,13 +342,13 @@ class StorageTemplateRepository(repo.TemplateRepository):
         print("META: ", meta)
         self._check_template_duplication(meta.id)
 
-        template_path = self._templates_path / str(meta.id)
-        self._file_storage.save_dir(zip_bytes, self._templates_path)
+        template_path = self._file_storage.root / str(meta.id)
+        self._file_storage.save_dir(zip_bytes)
 
         return self.create_from_path(template_path)
 
     def _get_template_path(self, template: entity.Template) -> pathlib.Path:
-        return self._templates_path / str(template.id)
+        return self._file_storage.root / str(template.id)
 
     def _get_template_version_path(
         self, template: entity.Template, version_tag: str
@@ -366,7 +360,7 @@ class StorageTemplateRepository(repo.TemplateRepository):
         meta_bytes = template.get_meta_bytes()
         template_path = self._get_template_path(template)
         meta_path = tpl_validator.get_meta_path(template_path)
-        self._file_storage.save_file(meta_path, meta_bytes)
+        self._file_storage.save_file(meta_bytes, meta_path)
 
     def _update_template_version_metadata(
         self, template: entity.Template, version: tpl_version.TemplateVersion
@@ -376,7 +370,7 @@ class StorageTemplateRepository(repo.TemplateRepository):
             template, version.tag_str
         )
         meta_path = tpl_validator.get_meta_path(version_path)
-        self._file_storage.save_file(meta_path, meta_bytes)
+        self._file_storage.save_file(meta_bytes, meta_path)
 
     def _create_version_from_zip(
         self,
