@@ -287,6 +287,6 @@ class DoctplDocxGenerator(DocxGenerator):
             / image_file.name
         )
         file_path = self._tmp_storage.save_file(
-            image_path, image_file.file_bytes
+            image_file.file_bytes, image_path
         )
         return file_path
