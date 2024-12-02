@@ -148,6 +148,16 @@ class DoctplDocxGenerator(DocxGenerator):
         context: dict[str, Any],
         attr: models.ContextAttribute,
     ):
+        if const.DIVIDER in attr.key:
+            try:
+                new_key, new_value = self._prepare_prefix(
+                    doc, models.PrefixValue(key=attr.key, value=attr.value)
+                )
+                context[new_key] = new_value
+                return
+            except errors.ZeroPrefixValueError:
+                return
+
         context[attr.key] = {}
         self._process_tpl_data(doc, attr.value, context[attr.key])
 
@@ -165,14 +175,16 @@ class DoctplDocxGenerator(DocxGenerator):
                     doc, models.PrefixValue(key=attr.key, value=item)
                 )
                 context[new_key].append(new_value)
-        else:
-            context[attr.key] = []
-            for item in attr.value:
-                if isinstance(item, dict):
-                    context[attr.key].append({})
-                    self._process_tpl_data(doc, item, context[attr.key][-1])  # type: ignore
-                else:
-                    context[attr.key].append(item)
+
+            return
+
+        context[attr.key] = []
+        for item in attr.value:
+            if isinstance(item, dict):
+                context[attr.key].append({})
+                self._process_tpl_data(doc, item, context[attr.key][-1])  # type: ignore
+            else:
+                context[attr.key].append(item)
 
     def _split_prefix_key(self, key: str) -> tuple[str, str]:
 
