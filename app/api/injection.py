@@ -58,6 +58,6 @@ def get_repo(
 
 
 def get_generator(
-    file_storage: storage.LocalStorage = fastapi.Depends(get_file_storage),
+    file_storage: storage.LocalStorage = fastapi.Depends(get_tmp_storage),
 ) -> docx.DocxGenerator:
     return docx.DoctplDocxGenerator(file_storage)

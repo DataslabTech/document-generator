@@ -20,7 +20,7 @@ class DownloadedFile:
     """
 
     name: str
-    file_bytes: io.BytesIO
+    file_bytes: bytes
 
 
 def download_file(url: str, filename: str | None = None) -> DownloadedFile:
@@ -50,9 +50,7 @@ def download_file(url: str, filename: str | None = None) -> DownloadedFile:
                     )
                 extension = content_type.split("/")[-1]
                 filename = f"{filename}.{extension}"
-        return DownloadedFile(
-            name=filename, file_bytes=io.BytesIO(response.content)
-        )
+        return DownloadedFile(name=filename, file_bytes=response.content)
 
     except ValueError as e:
         raise DownloadFileError(f"Invalid URL provided: {url}") from e

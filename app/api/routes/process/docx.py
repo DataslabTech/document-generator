@@ -97,7 +97,7 @@ def create_docx_for_latest_version(
             content=schemas.HttpPayloadValidationError(
                 detail="Template body is invalid.",
                 validation_result=str(e),
-            ),
+            ).model_dump(mode="json"),
         )
 
 

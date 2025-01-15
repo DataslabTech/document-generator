@@ -1,6 +1,7 @@
 """Модуль описує інтерфейс `DocGenerator` та клас `DocxDocGenerator`."""
 
 import io
+import json
 import pathlib
 import uuid
 from abc import ABC, abstractmethod
@@ -11,8 +12,10 @@ import docxtpl
 import jinja2
 import pydantic
 import pyqrcode
+from docx.image import image
+from PIL import Image
 
-from app.core import config
+from app.core import config, logs
 from app.internal import storage, webclient
 from app.internal.docx import const, errors, filters, formulas, models
 
@@ -68,6 +71,9 @@ class DoctplDocxGenerator(DocxGenerator):
         autoescape: bool = True,
     ) -> None:
         try:
+            json_context = json.dumps(raw_context, ensure_ascii=False)
+            logs.logger.info("Recieved generation context: \n%s", json_context)
+
             context = self._prepare_context(doc, raw_context)
             doc.render(context, filters.env, autoescape=autoescape)
         except jinja2.exceptions.UndefinedError as e:
@@ -294,11 +300,24 @@ class DoctplDocxGenerator(DocxGenerator):
 
     def _get_image_from_source(self, source: str) -> pathlib.Path:
         image_file = webclient.download_file(source)
+        image_stream = self._check_image_signatures(image_file.file_bytes)
         image_path = (
             pathlib.Path(config.settings.LOCAL_STORAGE_TMP_PATH)
             / image_file.name
         )
-        file_path = self._tmp_storage.save_file(
-            image_file.file_bytes, image_path
-        )
+        file_path = self._tmp_storage.save_file(image_stream, image_path)
         return file_path
+
+    def _check_image_signatures(self, image_bytes: bytes) -> io.BytesIO:
+        try:
+            stream = io.BytesIO(image_bytes)
+            image._ImageHeaderFactory(stream)
+            stream.seek(0)
+            return stream
+        except image.UnrecognizedImageError:
+            print("Unrecognized image. Trying converting to RGB...")
+            im = Image.open(io.BytesIO(image_bytes))
+            rgb_im = im.convert("RGB")
+            new_image_stream = io.BytesIO()
+            rgb_im.save(new_image_stream, "JPEG")
+            return new_image_stream

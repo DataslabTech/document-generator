@@ -29,6 +29,7 @@ async def lifespan(app: fastapi.FastAPI):
 
     file_storage = storage.LocalStorage(template_path)
     tmp_storage = storage.LocalStorage(tmp_path)
+    print(tmp_storage.root)
 
     tmp_validator = template.StorageTemplateValidator(tmp_storage)
     validator = template.StorageTemplateValidator(file_storage)
