@@ -349,7 +349,12 @@ class DoctplDocxGenerator(DocxGenerator):
             if isinstance(el, bs4.element.NavigableString):
                 text = str(el).strip("\n")
                 if text:
-                    rt.add(text, **formatting)
+                    rt.add(
+                        text,
+                        font=html_data.font,
+                        size=html_data.size * 2 if html_data.size else None,
+                        **formatting,
+                    )
 
             elif isinstance(el, bs4.element.Tag):
                 tag = el.name.lower()

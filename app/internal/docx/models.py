@@ -144,3 +144,5 @@ class DocxHtml(pydantic.BaseModel):
     """
 
     html: str
+    font: str | None = None
+    size: int | None = None
