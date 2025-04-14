@@ -134,3 +134,13 @@ class DocxRichText(pydantic.BaseModel):
 
     base_text: str
     adds: list[DocxRichTextAddition]
+
+
+class DocxHtml(pydantic.BaseModel):
+    """DTO для ключа контексту `HTML|<KEY>`
+
+    Attributes:
+        html: HTML-код для вставки в документ.
+    """
+
+    html: str

@@ -6,5 +6,6 @@ IMG: Final = "IMG"
 MATH: Final = "MATH"
 QR: Final = "QR"
 RICH: Final = "RICH"
+HTML: Final = "HTML"
 
 DIVIDER: Final = "|"

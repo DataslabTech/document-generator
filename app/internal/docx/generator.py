@@ -1,5 +1,7 @@
 """Модуль описує інтерфейс `DocGenerator` та клас `DocxDocGenerator`."""
 
+# TODO: Винести обробники префіксів в окремі класи. Виділити єдиний інтерфейс для обробників, та додати динамічне приєднання обробника до генератора.
+
 import io
 import json
 import pathlib
@@ -7,6 +9,7 @@ import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Callable
 
+import bs4
 import docx.shared as docx_shared
 import docxtpl
 import jinja2
@@ -55,6 +58,7 @@ class DoctplDocxGenerator(DocxGenerator):
             const.MATH: self._prepare_formula,
             const.QR: self._prepare_qrcode,
             const.RICH: self._prepare_rich_text,
+            const.HTML: self._prepare_html,
         }
 
     def generate_bytes(
@@ -79,6 +83,10 @@ class DoctplDocxGenerator(DocxGenerator):
         except jinja2.exceptions.UndefinedError as e:
             raise errors.DocumentGenerationError(
                 f"Key is not present in request body: {e}"
+            )
+        except jinja2.exceptions.TemplateSyntaxError as e:
+            raise errors.DocumentGenerationError(
+                f"Invalid template syntax: {e}"
             )
         except TypeError as e:
             raise errors.DocumentGenerationError(
@@ -321,3 +329,54 @@ class DoctplDocxGenerator(DocxGenerator):
             new_image_stream = io.BytesIO()
             rgb_im.save(new_image_stream, "JPEG")
             return new_image_stream
+
+    def _prepare_html(
+        self, doc: docxtpl.DocxTemplate, prefix_value: models.PrefixValue
+    ):
+        html_data = models.DocxHtml(**prefix_value.value)
+        soup = bs4.BeautifulSoup(html_data.html, "lxml")
+
+        rt = docxtpl.RichText()
+        first_paragraph = True
+
+        def parse_element(
+            el: bs4.element.PageElement,
+            formatting: dict[str, bool] | None = None,
+        ):
+            if formatting is None:
+                formatting = {}
+
+            if isinstance(el, bs4.element.NavigableString):
+                text = str(el).strip("\n")
+                if text:
+                    rt.add(text, **formatting)
+
+            elif isinstance(el, bs4.element.Tag):
+                tag = el.name.lower()
+
+                # Clone formatting
+                new_formatting = formatting.copy()
+
+                if tag in ("strong", "b"):
+                    new_formatting["bold"] = True
+                elif tag in ("em", "i"):
+                    new_formatting["italic"] = True
+                elif tag == "u":
+                    new_formatting["underline"] = True
+
+                if tag == "br":
+                    rt.add("\n")
+                    return
+                if tag == "p":
+                    nonlocal first_paragraph
+                    if not first_paragraph:
+                        rt.add("\n")
+                    first_paragraph = False
+
+                for child in el.children:
+                    parse_element(child, new_formatting)
+
+        for elem in soup.body.contents if soup.body else soup.contents:
+            parse_element(elem)
+
+        return rt
