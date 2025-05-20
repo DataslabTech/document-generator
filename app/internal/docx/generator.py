@@ -259,7 +259,15 @@ class DoctplDocxGenerator(DocxGenerator):
         self, doc: docxtpl.DocxTemplate, prefix_value: models.PrefixValue
     ) -> docxtpl.InlineImage:
         qrcode_data = models.DocxQrCode.model_validate(prefix_value.value)
-        encoded_data = pyqrcode.create(qrcode_data.data, encoding="utf-8")  # type: ignore # noqa
+        kwargs: dict[str, Any] = {
+            "encoding": "utf-8",
+            "error": qrcode_data.error.value,
+        }
+
+        if qrcode_data.version is not None:
+            kwargs["version"] = qrcode_data.version
+
+        encoded_data = pyqrcode.create(qrcode_data.data, **kwargs)  # type: ignore # noqa
 
         qr_filename = (
             pathlib.Path(config.settings.LOCAL_STORAGE_TEMPLATE_PATH)

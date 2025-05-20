@@ -1325,6 +1325,18 @@ pylint = ">2.0,<4.0"
 pylint-plugin-utils = "*"
 
 [[package]]
+name = "pypng"
+version = "0.20220715.0"
+description = "Pure Python library for saving and loading PNG images"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "pypng-0.20220715.0-py3-none-any.whl", hash = "sha256:4a43e969b8f5aaafb2a415536c1a8ec7e341cd6a3f957fd5b5f32a4cfeed902c"},
+    {file = "pypng-0.20220715.0.tar.gz", hash = "sha256:739c433ba96f078315de54c0db975aee537cbc3e1d0ae4ed9aab0ca1e427e2c1"},
+]
+
+[[package]]
 name = "pyqrcode"
 version = "1.2.1"
 description = "A QR code generator written purely in Python with SVG, EPS, PNG and terminal output."
@@ -2036,4 +2048,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "0e0b9b6073fb0eb21e2b464130e9f0d9fc3c8d308382f2d717f553345e62cfec"
+content-hash = "1943241425dfd205d0d06cf59ec962f77f5b8be1757e35b447bd81789e76da85"

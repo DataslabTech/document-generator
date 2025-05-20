@@ -69,6 +69,15 @@ class DocxInlineImage(pydantic.BaseModel):
         return _validate_image_dimension(value)
 
 
+class QrErrorType(enum.Enum):
+    """Перелік типів помилок QR-коду."""
+
+    L = "L"
+    M = "M"
+    Q = "Q"
+    H = "H"
+
+
 class DocxQrCode(pydantic.BaseModel):
     """DTO для ключа контексту `QR|<KEY>`
 
@@ -78,6 +87,8 @@ class DocxQrCode(pydantic.BaseModel):
     """
 
     data: str
+    version: int | None = pydantic.Field(None, ge=1, le=40)
+    error: QrErrorType = QrErrorType.M
     width: int | None = None
 
     @pydantic.field_validator("data", mode="before")
