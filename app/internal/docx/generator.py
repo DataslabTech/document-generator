@@ -270,7 +270,7 @@ class DoctplDocxGenerator(DocxGenerator):
         encoded_data = pyqrcode.create(qrcode_data.data, **kwargs)  # type: ignore # noqa
 
         qr_filename = (
-            pathlib.Path(config.settings.LOCAL_STORAGE_TEMPLATE_PATH)
+            pathlib.Path(config.settings.LOCAL_STORAGE_TMP_PATH)
             / f"qrcode_{uuid.uuid4()}.png"
         )
 
