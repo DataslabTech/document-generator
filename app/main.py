@@ -29,7 +29,6 @@ async def lifespan(app: fastapi.FastAPI):
 
     file_storage = storage.LocalStorage(template_path)
     tmp_storage = storage.LocalStorage(tmp_path)
-    print(tmp_storage.root)
 
     tmp_validator = template.StorageTemplateValidator(tmp_storage)
     validator = template.StorageTemplateValidator(file_storage)
@@ -42,8 +41,8 @@ async def lifespan(app: fastapi.FastAPI):
 
     yield
 
-    if file_storage.exists(tmp_path):
-        file_storage.delete(tmp_path)
+    if tmp_storage.exists(tmp_path):
+        tmp_storage.delete(tmp_path)
 
 
 app = fastapi.FastAPI(

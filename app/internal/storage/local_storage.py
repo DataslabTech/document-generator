@@ -13,6 +13,7 @@ class LocalStorage(storage.Storage):
     """Local filesystem storage with root directory enforcement."""
 
     def __init__(self, root: pathlib.Path):
+        root.mkdir(parents=True, exist_ok=True)
         self._root = root.resolve()
 
     @property
