@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-fastapi = {extras = ["uvicorn"], version = "^0.111.0"}
+fastapi = { extras = ["uvicorn"], version = "^0.111.0" }
 docxtpl = "0.17.0"
 pyqrcode = "^1.2.1"
 pydantic-settings = "^2.2.1"
@@ -22,15 +22,17 @@ pillow = "^11.1.0"
 beautifulsoup4 = "^4.13.3"
 lxml = "^5.3.2"
 pypng = "^0.20220715.0"
+python-barcode = "^0.16.1"
+
+[tool.poetry.scripts]
+app = "uvicorn app.main:app --port 1111"
 
 [tool.pylint.master]
 ignore-paths = ["tests/.*"]
 
 [tool.pyright]
 typeCheckingMode = "strict"
-ignore = [
-    "tests/*",
-]
+ignore = ["tests/*"]
 
 [build-system]
 requires = ["poetry-core"]

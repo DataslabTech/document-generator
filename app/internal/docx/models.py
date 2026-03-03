@@ -104,6 +104,42 @@ class DocxQrCode(pydantic.BaseModel):
         return _validate_image_dimension(value)
 
 
+class BarcodeType(enum.Enum):
+    """Перелік типів штрихкодів."""
+
+    CODE128 = "code128"
+    EAN13 = "ean13"
+    EAN8 = "ean8"
+
+
+class DocxBarcode(pydantic.BaseModel):
+    """DTO для ключа контексту `BARCODE|<KEY>`
+
+    Attributes:
+        data: Дані для кодування.
+        type: Тип штрихкоду.
+        width: Ширина зображення (в см).
+        height: Висота зображення (в см).
+    """
+
+    data: str
+    type: BarcodeType = BarcodeType.CODE128
+    width: int | None = None
+    height: int | None = None
+
+    @pydantic.field_validator("data", mode="before")
+    @classmethod
+    def _validate_data(cls, value: Any):
+        if value == "":
+            raise errors.ZeroPrefixValueError("Empty data passed")
+        return value
+
+    @pydantic.field_validator("width", "height", mode="before")
+    @classmethod
+    def _validate_dimensions(cls, value: Any):
+        return _validate_image_dimension(value)
+
+
 class RichTextUnderline(enum.Enum):
     """Перелік типів нижнього підкреслення тексту."""
 

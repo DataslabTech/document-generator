@@ -9,12 +9,14 @@ import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Callable
 
+import barcode
 import bs4
 import docx.shared as docx_shared
 import docxtpl
 import jinja2
 import pydantic
 import pyqrcode
+from barcode.writer import ImageWriter
 from docx.image import image
 from PIL import Image
 
@@ -59,6 +61,7 @@ class DoctplDocxGenerator(DocxGenerator):
             const.QR: self._prepare_qrcode,
             const.RICH: self._prepare_rich_text,
             const.HTML: self._prepare_html,
+            const.BARCODE: self._prepare_barcode,
         }
 
     def generate_bytes(
@@ -278,6 +281,36 @@ class DoctplDocxGenerator(DocxGenerator):
         return self._build_inline_image(
             doc, qr_filename, width=qrcode_data.width
         )
+
+    def _prepare_barcode(
+        self, doc: docxtpl.DocxTemplate, prefix_value: models.PrefixValue
+    ) -> docxtpl.InlineImage:
+        try:
+            barcode_data = models.DocxBarcode.model_validate(prefix_value.value)
+            barcode_class = barcode.get_barcode_class(barcode_data.type.value)
+
+            barcode_obj = barcode_class(
+                barcode_data.data,
+                writer=ImageWriter(),
+            )
+
+            barcode_filename = (
+                pathlib.Path(config.settings.LOCAL_STORAGE_TMP_PATH)
+                / f"barcode_{uuid.uuid4()}"
+            )
+
+            saved_path = pathlib.Path(barcode_obj.save(str(barcode_filename)))
+
+            return self._build_inline_image(
+                doc,
+                saved_path,
+                width=barcode_data.width,
+                height=barcode_data.height,
+            )
+        except (pydantic.ValidationError, Exception) as e:
+            raise errors.PreparePrefixError(
+                f"Cannot prepare prefix {prefix_value.key}. Reason: {e}"
+            )
 
     def _prepare_header_footer_image(
         self, doc: docxtpl.DocxTemplate, prefix_value: models.PrefixValue

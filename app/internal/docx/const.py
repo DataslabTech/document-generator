@@ -7,5 +7,6 @@ MATH: Final = "MATH"
 QR: Final = "QR"
 RICH: Final = "RICH"
 HTML: Final = "HTML"
+BARCODE: Final = "BARCODE"
 
 DIVIDER: Final = "|"
