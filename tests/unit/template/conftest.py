@@ -32,10 +32,10 @@ def proper_generation_payload() -> dict[str, Any]:
     }
 
 
-version_meta_yaml = """created_at: '2024-07-01T22:24:41.061069'
-message: first version
+version_meta_yaml = """created_at: "2024-07-01T22:24:41.061069"
+message: "first version"
 tag: v1.0.0
-updated_at: '2024-07-01T22:24:41.061069'
+updated_at: "2024-07-01T22:24:41.061069"
 """
 
 
@@ -60,29 +60,29 @@ def version_object(
 
 @pytest.fixture(scope="session")
 def template_meta_yaml() -> str:
-    return """created_at: '2024-06-28T14:30:52.773130'
-description: Report document description
+    return """created_at: "2024-06-28T14:30:52.773130"
+description: "Report document description"
 id: d3a17928-e147-423e-825a-80c987f275a9
 labels:
-- example
-- template
-- testing
-title: Report document template
+  - example
+  - template
+  - testing
+title: "Report document template"
 updated_at: null
 versions:
-- v0.0.2
-- v0.0.1
+  - v0.0.2
+  - v0.0.1
 """
 
 
-template_meta_data_without_versions_yaml = """created_at: '2024-06-28T14:30:52.773130'
-description: Report document description
+template_meta_data_without_versions_yaml = """created_at: "2024-06-28T14:30:52.773130"
+description: "Report document description"
 id: d3a17928-e147-423e-825a-80c987f275a9
 labels:
-- example
-- template
-- testing
-title: Report document template
+  - example
+  - template
+  - testing
+title: "Report document template"
 updated_at: null
 versions: []
 """

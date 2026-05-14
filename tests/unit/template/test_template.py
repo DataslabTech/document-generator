@@ -6,18 +6,18 @@ import pytest
 from app.internal.template import entity, meta, version
 from tests import factory
 
-metadata_yaml_str = """created_at: '2024-06-28T14:30:52.773130'
-description: Report document description
+metadata_yaml_str = """created_at: "2024-06-28T14:30:52.773130"
+description: "Report document description"
 id: d3a17928-e147-423e-825a-80c987f275a9
 labels:
-- example
-- template
-- testing
-title: Report document template
+  - example
+  - template
+  - testing
+title: "Report document template"
 updated_at: null
 versions:
-- v0.0.2
-- v0.0.1
+  - v0.0.2
+  - v0.0.1
 """
 
 

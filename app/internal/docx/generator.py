@@ -277,7 +277,9 @@ class DoctplDocxGenerator(DocxGenerator):
             / f"qrcode_{uuid.uuid4()}.png"
         )
 
-        encoded_data.png(qr_filename, scale=8)  # type: ignore
+        encoded_data.png(  # type: ignore
+            qr_filename, scale=8, quiet_zone=qrcode_data.padding
+        )
         return self._build_inline_image(
             doc, qr_filename, width=qrcode_data.width
         )
@@ -299,7 +301,15 @@ class DoctplDocxGenerator(DocxGenerator):
                 / f"barcode_{uuid.uuid4()}"
             )
 
-            saved_path = pathlib.Path(barcode_obj.save(str(barcode_filename)))
+            writer_options = {
+                "quiet_zone": barcode_data.padding,
+                "margin_top": barcode_data.padding,
+                "margin_bottom": barcode_data.padding,
+                "write_text": barcode_data.show_text,
+            }
+            saved_path = pathlib.Path(
+                barcode_obj.save(str(barcode_filename), writer_options)
+            )
 
             return self._build_inline_image(
                 doc,

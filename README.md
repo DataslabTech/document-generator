@@ -140,7 +140,8 @@ Swagger документація доступна за шляхом `{host}/docs
 {
   "data": "some coded data",
   "width": 5, // OPTIONAL int, ширина зображення в мм
-  "height": 7 // OPTIONAL int, висота зображення в мм
+  "height": 7, // OPTIONAL int, висота зображення в мм
+  "padding": 0 // OPTIONAL int, тиха зона навколо QR-коду в модулях
 }
 ```
 
@@ -178,7 +179,8 @@ Swagger документація доступна за шляхом `{host}/docs
   "QR|YOUTUBE": {
     "data": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "width": 15,
-    "height": 15
+    "height": 15,
+    "padding": 0
   },
   "MATH|FORMULA654": {
     "formula": "\\sum_{i=1}^{10}{\\frac{\\sigma_{zp,i}}{E_i} kN"

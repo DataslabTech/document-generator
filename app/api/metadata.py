@@ -45,6 +45,7 @@ template_json_body_example = {
         "data": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
         "width": 15,
         "height": 15,
+        "padding": 0,
     },
     "MATH|FORMULA654": {
         "formula": "\\sum_{i=1}^{10}{\\frac{\\sigma_{zp,i}}{E_i} kN"

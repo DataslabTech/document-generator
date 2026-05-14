@@ -25,7 +25,7 @@ pypng = "^0.20220715.0"
 python-barcode = "^0.16.1"
 
 [tool.poetry.scripts]
-app = "uvicorn app.main:app --port 1111"
+app = "find . -name '.DS_Store' -delete && uvicorn app.main:app --port 1111"
 
 [tool.pylint.master]
 ignore-paths = ["tests/.*"]

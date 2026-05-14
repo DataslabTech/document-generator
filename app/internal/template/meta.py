@@ -10,6 +10,18 @@ import pydantic
 import yaml
 
 VERSION_PATTERN = r"^v\d+\.\d+\.\d+$"
+PLAIN_STRING_PATTERN = re.compile(r"^[A-Za-z0-9._-]+$")
+FIELD_ORDER = {
+    "created_at": 0,
+    "description": 10,
+    "id": 20,
+    "labels": 30,
+    "message": 40,
+    "tag": 50,
+    "title": 60,
+    "updated_at": 70,
+    "versions": 80,
+}
 
 
 def is_version(version: str) -> bool:
@@ -226,8 +238,74 @@ class MetaData(pydantic.BaseModel):
         Returns:
           `BytesIO` потік `.yaml` файлу з даними `MetaData`.
         """
-        model_dict = self.model_dump(mode="json")
+        model_dict = _order_mapping(self.model_dump(mode="json"))
         output = io.BytesIO()
-        yaml.dump(model_dict, output, encoding="utf-8")
+        output.write(_dump_yaml(model_dict).encode("utf-8"))
         output.seek(0)
         return output
+
+
+def _dump_yaml(data: dict[str, Any]) -> str:
+    """Сереалізувати JSON-подібний словник в читабельний YAML."""
+    lines = _to_yaml_lines(data)
+    return "\n".join(lines) + "\n"
+
+
+def _order_mapping(data: dict[str, Any]) -> dict[str, Any]:
+    ordered_items = sorted(
+        data.items(),
+        key=lambda item: (FIELD_ORDER.get(item[0], 100), item[0]),
+    )
+    return {key: value for key, value in ordered_items}
+
+
+def _to_yaml_lines(value: Any, indent: int = 0) -> list[str]:
+    prefix = " " * indent
+
+    if isinstance(value, dict):
+        lines: list[str] = []
+        for key, item in value.items():
+            if isinstance(item, list) and not item:
+                lines.append(f"{prefix}{key}: []")
+            elif isinstance(item, (dict, list)):
+                lines.append(f"{prefix}{key}:")
+                lines.extend(_to_yaml_lines(item, indent + 2))
+            else:
+                lines.append(f"{prefix}{key}: {_format_scalar(item)}")
+        return lines
+
+    if isinstance(value, list):
+        if not value:
+            return [f"{prefix}[]"]
+
+        lines = []
+        for item in value:
+            if isinstance(item, (dict, list)):
+                nested_lines = _to_yaml_lines(item, indent + 2)
+                lines.append(f"{prefix}- {nested_lines[0].lstrip()}")
+                lines.extend(nested_lines[1:])
+            else:
+                lines.append(f"{prefix}- {_format_scalar(item)}")
+        return lines
+
+    return [f"{prefix}{_format_scalar(value)}"]
+
+
+def _format_scalar(value: Any) -> str:
+    if value is None:
+        return "null"
+
+    if isinstance(value, bool):
+        return "true" if value else "false"
+
+    if isinstance(value, (int, float)):
+        return str(value)
+
+    if isinstance(value, str):
+        if PLAIN_STRING_PATTERN.fullmatch(value):
+            return value
+
+        escaped_value = value.replace("\\", "\\\\").replace('"', '\\"')
+        return f'"{escaped_value}"'
+
+    raise TypeError(f"Unsupported metadata field type: {type(value)!r}")

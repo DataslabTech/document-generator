@@ -83,6 +83,7 @@ class DocxQrCode(pydantic.BaseModel):
 
     Attributes:
         data: Дані для кодування.
+        padding: Розмір тихої зони навколо QR-коду в модулях.
         width: Ширина зображення (в см).
     """
 
@@ -90,6 +91,7 @@ class DocxQrCode(pydantic.BaseModel):
     version: int | None = pydantic.Field(None, ge=1, le=40)
     error: QrErrorType = QrErrorType.M
     width: int | None = None
+    padding: int = pydantic.Field(0, ge=0)
 
     @pydantic.field_validator("data", mode="before")
     @classmethod
@@ -120,12 +122,16 @@ class DocxBarcode(pydantic.BaseModel):
         type: Тип штрихкоду.
         width: Ширина зображення (в см).
         height: Висота зображення (в см).
+        padding: Відступи навколо штрихкоду в мм.
+        show_text: Додати текстове представлення під штрихкодом.
     """
 
     data: str
     type: BarcodeType = BarcodeType.CODE128
     width: int | None = None
     height: int | None = None
+    padding: float = pydantic.Field(0, ge=0)
+    show_text: bool = False
 
     @pydantic.field_validator("data", mode="before")
     @classmethod

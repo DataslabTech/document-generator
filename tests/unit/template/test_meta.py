@@ -85,7 +85,10 @@ class TestVersionTag:
 
 
 def test_meta_data_bytes_transform():
-    yaml_init = "created_at: '2024-07-01T22:24:41.061069'\nupdated_at: '2024-07-01T22:24:41.061069'\n"
+    yaml_init = (
+        'created_at: "2024-07-01T22:24:41.061069"\n'
+        'updated_at: "2024-07-01T22:24:41.061069"\n'
+    )
 
     meta_data = meta.MetaData.from_bytes(io.BytesIO(yaml_init.encode("utf-8")))
     yaml_after = meta_data.to_bytes().getvalue().decode("utf-8")
